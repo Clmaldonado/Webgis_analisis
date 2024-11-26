@@ -8,9 +8,9 @@ let allReports = []; // Almacenar todos los reportes
 // Inicializar el mapa con el centro y zoom bloqueado
 const map = L.map("map", {
     center: [-37.47197, -72.34518], // Coordenadas del campus UDEC
-    zoom: 17, // Nivel de zoom inicial
-    maxZoom: 17, // Nivel máximo de zoom
-    minZoom: 17, // Nivel mínimo de zoom
+    zoom: 19, // Nivel de zoom inicial (más cercano)
+    maxZoom: 19, // Nivel máximo de zoom (puedes ajustar según lo que necesites)
+    minZoom: 19, // Nivel mínimo de zoom (para mantenerlo fijo)
     zoomControl: false, // Deshabilitar el control de zoom
     dragging: false, // Deshabilitar el arrastre del mapa
     scrollWheelZoom: false, // Deshabilitar el zoom con la rueda del ratón
@@ -21,7 +21,7 @@ const map = L.map("map", {
 
 // Agregar la capa del mapa base
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19, // Zoom máximo soportado por la capa base
+    maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
 // Evento para exportar la tabla a Excel
