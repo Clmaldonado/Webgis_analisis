@@ -35,26 +35,21 @@ function getTableDataForHeatmap() {
     const rows = document.querySelectorAll("#reportTable tbody tr");
     const heatmapData = [];
 
-    rows.forEach((row, index) => {
+    rows.forEach(row => {
         const cells = row.querySelectorAll("td");
-        const location = cells[7]?.textContent.trim(); // Cambia al índice correcto si es necesario
-        const urgency = cells[4]?.textContent.trim();
-
-        console.log(`Fila ${index + 1}:`, { location, urgency }); // Diagnóstico de cada fila
+        const location = cells[7]?.textContent.trim(); // Columna oculta (índice 7)
+        const urgency = cells[4]?.textContent.trim(); // Columna de urgencia (índice 4)
 
         if (location && urgency) {
             const coords = location.split(" ").map(parseFloat);
             const weight = getUrgencyWeight(urgency);
 
-            if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) && weight > 0) {
+            if (coords.length === 2 && weight > 0) {
                 heatmapData.push([...coords, weight]);
-            } else {
-                console.warn(`Datos inválidos en la fila ${index + 1}:`, { coords, weight });
             }
         }
     });
 
-    console.log("Datos del mapa de calor:", heatmapData);
     return heatmapData;
 }
 
@@ -274,6 +269,7 @@ function renderTable(reports) {
             <td>${report.urgency_level}</td>
             <td>${report.detection_date}</td>
             <td>${report.issue_description || "No disponible"}</td>
+            <td style="display: none;">${report.location || ""}</td> <!-- Columna oculta para ubicación -->
             <td>
                 ${report.photo_evidence 
                     ? `<a href="${report.photo_evidence}" target="_blank">
@@ -285,6 +281,7 @@ function renderTable(reports) {
         tableBody.appendChild(row);
     });
 }
+
 
 // Función para aplicar filtros
 function applyFilters() {
