@@ -71,7 +71,23 @@ async function fetchHeatmapDataFromKobo() {
     }
 }
 
-// Función para actualizar el mapa de calor con datos de KoboToolbox
+// Definir los límites del campus (rectángulo delimitador)
+const campusBounds = [
+    [-37.4725, -72.3465], // Esquina inferior izquierda
+    [-37.4715, -72.3440]  // Esquina superior derecha
+];
+
+// Agregar un rectángulo delimitador al mapa
+const campusRectangle = L.rectangle(campusBounds, {
+    color: "blue", // Color del borde
+    weight: 2, // Grosor de la línea
+    fillOpacity: 0.1 // Opacidad del relleno
+}).addTo(map);
+
+// Ajustar la vista del mapa para que incluya el rectángulo delimitador
+map.fitBounds(campusBounds);
+
+// Actualizar la función `updateHeatmapFromKobo` para considerar los datos dentro del rectángulo
 async function updateHeatmapFromKobo() {
     const heatmapData = await fetchHeatmapDataFromKobo();
 
@@ -80,8 +96,19 @@ async function updateHeatmapFromKobo() {
         return;
     }
 
+    // Filtrar puntos que están dentro del rectángulo delimitador
+    const filteredHeatmapData = heatmapData.filter(([lat, lon]) =>
+        lat >= campusBounds[0][0] && lat <= campusBounds[1][0] && // Verificar latitud
+        lon >= campusBounds[0][1] && lon <= campusBounds[1][1]    // Verificar longitud
+    );
+
+    if (!filteredHeatmapData.length) {
+        alert("No hay puntos dentro del área delimitada.");
+        return;
+    }
+
     if (!heatLayer) {
-        heatLayer = L.heatLayer(heatmapData, {
+        heatLayer = L.heatLayer(filteredHeatmapData, {
             radius: 20,
             blur: 15,
             maxZoom: 19,
@@ -92,7 +119,7 @@ async function updateHeatmapFromKobo() {
             },
         }).addTo(map);
     } else {
-        heatLayer.setLatLngs(heatmapData); // Actualizar datos
+        heatLayer.setLatLngs(filteredHeatmapData); // Actualizar datos
     }
 }
 
