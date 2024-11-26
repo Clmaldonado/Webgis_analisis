@@ -173,8 +173,9 @@ main {
     border-collapse: collapse;
     margin-top: 1rem;
     overflow-x: auto;
+    display: block; /* Hace que la tabla sea desplazable */
+    white-space: nowrap; /* Previene el salto de línea de las celdas */
 }
-
 #reportTable thead {
     background: #1abc9c;
     color: white;
@@ -221,16 +222,40 @@ main {
         font-size: 1.2rem;
     }
 
-    #reportTable {
-        font-size: 0.8rem;
+  #reportTable {
+        display: block; /* Hace la tabla en bloque */
+        overflow-x: auto;
     }
 
-    #reportTable th,
+    #reportTable thead {
+        display: none; /* Oculta el encabezado en móviles */
+    }
+
+    #reportTable tbody tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ddd;
+        margin-bottom: 1rem;
+        padding: 10px;
+        border-radius: 10px;
+        background: #fff;
+    }
+
     #reportTable td {
-        padding: 8px;
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        font-size: 0.9rem;
+    }
+
+    #reportTable td::before {
+        content: attr(data-label); /* Usa el atributo data-label como encabezado */
+        font-weight: bold;
+        color: #333;
+        margin-right: 10px;
+        flex-shrink: 0;
     }
 }
-
 @media (max-width: 480px) {
     header h1 {
         font-size: 1.5rem;
