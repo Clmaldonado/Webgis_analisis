@@ -4,6 +4,7 @@ const API_URL = window.location.hostname === 'localhost'
     : 'https://webgis-analisis.onrender.com/api'; // En producción
 
 let allReports = []; // Almacenar todos los reportes
+let heatLayer; // Variable para almacenar la capa del mapa de calor
 
 // Inicializar el mapa con el centro y zoom bloqueado
 const map = L.map("map", {
@@ -24,48 +25,43 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
-// Variable para almacenar la capa del mapa de calor
-let heatLayer;
-
-// Función para obtener el peso del marcador basado en la urgencia
+// Función para calcular peso según la urgencia
 function getUrgencyWeight(urgencyLevel) {
-    return urgencyLevel === "Alto" ? 3 : urgencyLevel === "Medio" ? 2 : 1; // Pesos: Bajo (1), Medio (2), Alto (3)
+    return urgencyLevel === "Alto" ? 3 : urgencyLevel === "Medio" ? 2 : 1;
 }
 
-// Función para alternar la visibilidad del mapa de calor
-function toggleHeatmap() {
-    const heatmapButton = document.getElementById("toggle-heatmap");
+// Función para obtener datos de la tabla
+function getTableDataForHeatmap() {
+    const rows = document.querySelectorAll("#reportTable tbody tr");
+    const heatmapData = [];
 
-    if (heatLayer) {
-        if (map.hasLayer(heatLayer)) {
-            map.removeLayer(heatLayer); // Ocultar el mapa de calor
-            heatmapButton.textContent = "Activar Mapa de Calor";
-        } else {
-            map.addLayer(heatLayer); // Mostrar el mapa de calor
-            heatmapButton.textContent = "Desactivar Mapa de Calor";
-        }
-    } else {
-        console.error("El mapa de calor no se ha inicializado.");
-        alert("No hay datos disponibles para el mapa de calor.");
-    }
-}
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const location = cells[7]?.textContent; // Suponiendo que la columna 8 tiene la ubicación
+        const urgency = cells[4]?.textContent; // Columna 5 para la urgencia
 
-// Función para actualizar la capa del mapa de calor
-function updateHeatmap(reports) {
-    const heatmapData = []; // Inicializa datos vacíos para el mapa de calor
+        if (location && urgency) {
+            const coords = location.split(" ").map(parseFloat);
+            const weight = getUrgencyWeight(urgency);
 
-    reports.forEach(report => {
-        if (report.location && report.urgency_level) {
-            const coords = report.location.split(" ").map(parseFloat);
-            const weight = getUrgencyWeight(report.urgency_level);
-
-            if (coords.length >= 2 && weight > 0) {
-                heatmapData.push([coords[0], coords[1], weight]); // Añade puntos con peso
+            if (coords.length === 2 && weight > 0) {
+                heatmapData.push([...coords, weight]);
             }
         }
     });
 
-    // Verifica si ya existe la capa del mapa de calor
+    return heatmapData;
+}
+
+// Función para actualizar el mapa de calor
+function updateHeatmapFromTable() {
+    const heatmapData = getTableDataForHeatmap();
+
+    if (!heatmapData.length) {
+        alert("No hay datos disponibles para el mapa de calor.");
+        return;
+    }
+
     if (!heatLayer) {
         heatLayer = L.heatLayer(heatmapData, {
             radius: 20,
@@ -76,13 +72,31 @@ function updateHeatmap(reports) {
                 0.65: 'lime',
                 1: 'red'
             }
-        });
+        }).addTo(map);
     } else {
-        heatLayer.setLatLngs(heatmapData); // Actualiza los datos si ya existe
+        heatLayer.setLatLngs(heatmapData); // Actualizar datos
     }
 }
 
-// Crear un control personalizado para el botón del mapa de calor
+// Función para alternar el mapa de calor
+function toggleHeatmap() {
+    const heatmapButton = document.getElementById("toggle-heatmap");
+
+    if (heatLayer) {
+        if (map.hasLayer(heatLayer)) {
+            map.removeLayer(heatLayer);
+            heatmapButton.textContent = "Activar Mapa de Calor";
+        } else {
+            updateHeatmapFromTable();
+            heatmapButton.textContent = "Desactivar Mapa de Calor";
+        }
+    } else {
+        updateHeatmapFromTable();
+        heatmapButton.textContent = "Desactivar Mapa de Calor";
+    }
+}
+
+// Crear botón para el mapa de calor
 const heatmapControl = L.control({ position: "bottomright" });
 
 heatmapControl.onAdd = function (map) {
@@ -92,38 +106,25 @@ heatmapControl.onAdd = function (map) {
     div.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
     div.style.borderRadius = "5px";
 
-    // Evitar que el botón interfiera con la interacción del mapa
     L.DomEvent.disableClickPropagation(div);
     return div;
 };
 
-// Agregar el control al mapa
+// Agregar control al mapa
 heatmapControl.addTo(map);
 
-// Manejar el evento del botón de mapa de calor
+// Manejar evento de clic del botón
 document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "toggle-heatmap") {
-        toggleHeatmap(); // Llama a la función al hacer clic en el botón
+        toggleHeatmap();
     }
 });
 
-// Llamar a `updateHeatmap` después de cargar los reportes
+// Cargar datos y renderizar mapa
 async function displayReports() {
-    allReports = await fetchReports(); // Cargar todos los reportes
-
-    const statistics = calculateStatistics(allReports);
-    displayStatistics(statistics);
-    renderMapMarkers(allReports);
+    allReports = await fetchReports();
     renderTable(allReports);
-
-    // Inicializar mapa de calor con datos iniciales
-    updateHeatmap(allReports);
-
-    // Agregar evento de filtros
-    document.querySelector("#apply-filters").addEventListener("click", () => {
-        const filteredReports = applyFilters();
-        updateHeatmap(filteredReports); // Actualizar el mapa de calor con datos filtrados
-    });
+    updateHeatmapFromTable(); // Inicia con los datos de la tabla
 }
 
 // Evento para exportar la tabla a Excel
