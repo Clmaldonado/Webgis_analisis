@@ -7,23 +7,195 @@ body {
     background-color: #f8f9fa;
 }
 
-/* Flexbox para contenedores generales */
+/* Encabezado */
+header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    border-bottom: 4px solid #1abc9c;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Contenedor Principal */
 main {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-/* Diseño Responsivo */
+/* Sección de Filtros */
+#filters-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+#filters-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+    color: #2c3e50;
+}
+
+#filters-section div {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+#filters-section label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #333;
+}
+
+#filters-section input[type="date"],
+#filters-section select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: auto;
+    flex: 1 1 auto;
+}
+
+#filters-section button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #1abc9c;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#filters-section button:hover {
+    background-color: #16a085;
+}
+
+/* Mapa */
+#map-section {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+#map {
+    height: 500px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.legend {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+}
+
+.legend h4 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.legend div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend .color-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+
+.legend .red {
+    background: red;
+}
+
+.legend .orange {
+    background: orange;
+}
+
+.legend .yellow {
+    background: yellow;
+}
+
+/* Estadísticas */
+#statistics-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+#statistics-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+    color: #2c3e50;
+}
+
+/* Tabla */
+#table-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#reportTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+#reportTable thead {
+    background: #1abc9c;
+    color: white;
+}
+
+#reportTable th,
+#reportTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+/* Responsividad */
 @media (max-width: 768px) {
     main {
         padding: 0.5rem;
     }
 
     #filters-section div {
-        display: flex;
         flex-direction: column;
-        gap: 10px;
     }
 
     #filters-section label {
@@ -32,11 +204,11 @@ main {
 
     #filters-section input,
     #filters-section select {
-        width: 100%; /* Hacen que los filtros ocupen toda la pantalla */
+        width: 100%;
     }
 
     #map {
-        height: 300px; /* Altura más reducida para dispositivos móviles */
+        height: 300px;
     }
 
     .legend {
@@ -46,12 +218,11 @@ main {
 
     #statistics-section h2,
     #table-section h2 {
-        font-size: 1.2rem; /* Reduce el tamaño del texto en móviles */
+        font-size: 1.2rem;
     }
 
     #reportTable {
         font-size: 0.8rem;
-        overflow-x: auto; /* Permite desplazamiento horizontal en caso necesario */
     }
 
     #reportTable th,
@@ -62,7 +233,7 @@ main {
 
 @media (max-width: 480px) {
     header h1 {
-        font-size: 1.5rem; /* Texto más pequeño en móviles */
+        font-size: 1.5rem;
     }
 
     #filters-section div {
@@ -70,11 +241,11 @@ main {
     }
 
     #map {
-        height: 250px; /* Más reducción para pantallas pequeñas */
+        height: 250px;
     }
 
     .legend {
-        display: none; /* Oculta la leyenda si ocupa demasiado espacio */
+        display: none;
     }
 
     #reportTable th,
