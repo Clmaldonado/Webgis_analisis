@@ -35,21 +35,26 @@ function getTableDataForHeatmap() {
     const rows = document.querySelectorAll("#reportTable tbody tr");
     const heatmapData = [];
 
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
         const cells = row.querySelectorAll("td");
-        const location = cells[7]?.textContent.trim(); // Suponiendo que la columna 8 tiene la ubicación
-        const urgency = cells[4]?.textContent.trim(); // Columna 5 para la urgencia
+        const location = cells[7]?.textContent.trim(); // Cambia al índice correcto si es necesario
+        const urgency = cells[4]?.textContent.trim();
+
+        console.log(`Fila ${index + 1}:`, { location, urgency }); // Diagnóstico de cada fila
 
         if (location && urgency) {
-            const coords = location.split(" ").map(parseFloat); // Convertir a coordenadas
+            const coords = location.split(" ").map(parseFloat);
             const weight = getUrgencyWeight(urgency);
 
             if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) && weight > 0) {
-                heatmapData.push([...coords, weight]); // Añadir coordenadas y peso al mapa de calor
+                heatmapData.push([...coords, weight]);
+            } else {
+                console.warn(`Datos inválidos en la fila ${index + 1}:`, { coords, weight });
             }
         }
     });
 
+    console.log("Datos del mapa de calor:", heatmapData);
     return heatmapData;
 }
 
