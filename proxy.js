@@ -1,34 +1,35 @@
 const express = require('express');
-const axios = require('axios');
-const app = express();
+const request = require('axios'); // Usando Axios en lugar de Request
+const path = require('path');
 
-const PORT = 3000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
 
-// Middleware para CORS
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*'); // Permitir cualquier origen
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
+// Middleware para servir archivos estáticos
+app.use(express.static(path.join(__dirname)));
 
-// Ruta para manejar las solicitudes al proxy
+// Ruta para manejar la API
 app.get('/api', async (req, res) => {
     try {
-        const response = await axios.get(API_URL, {
+        const response = await request.get(API_URL, {
             headers: {
-                Authorization: 'Token ffa135f8b667ddb65202f7b5209e6ebd881aa542',
-                Accept: 'application/json',
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa variable de entorno para el token
             },
         });
         res.status(response.status).send(response.data);
     } catch (error) {
-        console.error('Error al realizar la solicitud a la API:', error.message);
+        console.error('Error al realizar la solicitud a la API:', error);
         res.status(500).send('Error al procesar los datos de la API.');
     }
 });
 
+// Ruta principal para servir `Webgis.html`
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Webgis.html'));
+});
+
 // Inicia el servidor
 app.listen(PORT, () => {
-    console.log(`Proxy corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
