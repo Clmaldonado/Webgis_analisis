@@ -26,8 +26,8 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 // Función para calcular peso según la urgencia
-function getUrgencyWeight(urgencyLevel) {
-    return urgencyLevel === "Alto" ? 3 : urgencyLevel === "Medio" ? 2 : 1;
+function getUrgencyWeight(urgency_level) {
+    return urgency_level === "high" ? 3 : urgency_level === "medium" ? 2 : 1; // Pesos según gravedad
 }
 
 // Función para obtener datos de la tabla
@@ -37,15 +37,15 @@ function getTableDataForHeatmap() {
 
     rows.forEach(row => {
         const cells = row.querySelectorAll("td");
-        const location = cells[7]?.textContent; // Suponiendo que la columna 8 tiene la ubicación
-        const urgency = cells[4]?.textContent; // Columna 5 para la urgencia
+        const location = cells[7]?.textContent.trim(); // Suponiendo que la columna 8 tiene la ubicación
+        const urgency = cells[4]?.textContent.trim(); // Columna 5 para la urgencia
 
         if (location && urgency) {
-            const coords = location.split(" ").map(parseFloat);
+            const coords = location.split(" ").map(parseFloat); // Convertir a coordenadas
             const weight = getUrgencyWeight(urgency);
 
-            if (coords.length === 2 && weight > 0) {
-                heatmapData.push([...coords, weight]);
+            if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]) && weight > 0) {
+                heatmapData.push([...coords, weight]); // Añadir coordenadas y peso al mapa de calor
             }
         }
     });
@@ -55,7 +55,7 @@ function getTableDataForHeatmap() {
 
 // Función para actualizar el mapa de calor
 function updateHeatmapFromTable() {
-    const heatmapData = getTableDataForHeatmap();
+    const heatmapData = getTableDataForHeatmap(); // Obtener datos desde la tabla
 
     if (!heatmapData.length) {
         alert("No hay datos disponibles para el mapa de calor.");
@@ -63,18 +63,15 @@ function updateHeatmapFromTable() {
     }
 
     if (!heatLayer) {
+        // Crear capa de mapa de calor si no existe
         heatLayer = L.heatLayer(heatmapData, {
-            radius: 20,
-            blur: 15,
+            radius: 20, // Radio de influencia
+            blur: 15, // Difusión
             maxZoom: 19,
-            gradient: {
-                0.4: 'blue',
-                0.65: 'lime',
-                1: 'red'
-            }
+            gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' } // Gradiente de colores
         }).addTo(map);
     } else {
-        heatLayer.setLatLngs(heatmapData); // Actualizar datos
+        heatLayer.setLatLngs(heatmapData); // Actualizar los datos en el mapa de calor existente
     }
 }
 
@@ -91,7 +88,7 @@ function toggleHeatmap() {
             heatmapButton.textContent = "Desactivar Mapa de Calor";
         }
     } else {
-        updateHeatmapFromTable();
+        updateHeatmapFromTable(); // Crear el mapa de calor si aún no existe
         heatmapButton.textContent = "Desactivar Mapa de Calor";
     }
 }
@@ -110,22 +107,15 @@ heatmapControl.onAdd = function (map) {
     return div;
 };
 
-// Agregar control al mapa
+// Agregar el control al mapa
 heatmapControl.addTo(map);
 
-// Manejar evento de clic del botón
+// Manejar evento de clic en el botón del mapa de calor
 document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "toggle-heatmap") {
         toggleHeatmap();
     }
 });
-
-// Cargar datos y renderizar mapa
-async function displayReports() {
-    allReports = await fetchReports();
-    renderTable(allReports);
-    updateHeatmapFromTable(); // Inicia con los datos de la tabla
-}
 
 // Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
