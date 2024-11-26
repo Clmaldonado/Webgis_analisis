@@ -38,15 +38,21 @@ async function fetchHeatmapDataFromKobo() {
 
         const data = await response.json(); // Supone que los datos tienen un formato JSON
 
+        console.log("Datos obtenidos de KoboToolbox:", data); // Depuración
+
         const heatmapData = [];
 
         data.results.forEach((report) => {
             const location = report.location; // Campo "location" en KoboToolbox
             const urgency = report.urgency_level; // Campo "urgency_level"
 
+            console.log("Procesando reporte:", { location, urgency }); // Depuración
+
             if (location && urgency) {
                 const [lat, lon] = location.split("\t").slice(0, 2).map(parseFloat); // Extraer lat y lon (ignora altura y precisión)
                 const weight = getUrgencyWeight(urgency.toLowerCase()); // Obtener peso basado en urgencia
+
+                console.log("Latitud:", lat, "Longitud:", lon, "Peso:", weight); // Depuración
 
                 if (lat && lon && weight > 0) {
                     heatmapData.push([lat, lon, weight]); // Añadir [lat, lon, peso]
@@ -54,7 +60,7 @@ async function fetchHeatmapDataFromKobo() {
             }
         });
 
-        console.log("Datos del mapa de calor obtenidos de KoboToolbox:", heatmapData);
+        console.log("Datos del mapa de calor obtenidos de KoboToolbox:", heatmapData); // Verifica la salida final
         return heatmapData;
     } catch (error) {
         console.error("Error al procesar los datos de KoboToolbox:", error);
