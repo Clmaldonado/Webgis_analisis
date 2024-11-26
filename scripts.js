@@ -9,6 +9,30 @@ let allReports = []; // Almacenar todos los reportes
 const map = L.map("map").setView([-37.47197, -72.34518], 17);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
 
+// Evento para exportar la tabla a Excel
+document.getElementById("exportExcel").addEventListener("click", function () {
+    // Seleccionar la tabla
+    const table = document.getElementById("reportTable");
+
+    // Crear una hoja de Excel
+    const worksheet = XLSX.utils.table_to_sheet(table, {
+        raw: true, // Mantener datos como números
+        cellDates: true, // Conservar formato de fechas
+    });
+
+    // Ignorar la columna de imágenes (última columna, columna G)
+    Object.keys(worksheet).forEach((key) => {
+        if (key.startsWith("G")) delete worksheet[key];
+    });
+
+    // Crear un libro de trabajo
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Reportes");
+
+    // Descargar el archivo Excel
+    XLSX.writeFile(workbook, "reportes.xlsx");
+});
+
 // Agregar leyenda al mapa
 const legend = L.control({ position: "bottomleft" });
 legend.onAdd = function () {
