@@ -30,32 +30,40 @@ function getUrgencyWeight(urgency_level) {
     return urgency_level === "high" ? 3 : urgency_level === "medium" ? 2 : 1; // Pesos según gravedad
 }
 
-// Función para obtener datos de la tabla
+// Función para obtener peso según la urgencia
+function getUrgencyWeight(urgency) {
+    return urgency === "high" ? 3 : urgency === "medium" ? 2 : 1;
+}
+
+// Función para obtener datos de la tabla ya renderizada
 function getTableDataForHeatmap() {
     const rows = document.querySelectorAll("#reportTable tbody tr");
-    const heatmapData = [];
+    const heatmapData = []; // Inicializa la lista para almacenar datos
 
     rows.forEach(row => {
         const cells = row.querySelectorAll("td");
-        const location = cells[7]?.textContent.trim(); // Columna oculta (índice 7)
-        const urgency = cells[4]?.textContent.trim(); // Columna de urgencia (índice 4)
+        
+        // Asegúrate de que las columnas tengan los datos correctos
+        const urgency = cells[4]?.textContent?.toLowerCase(); // Columna de urgencia (asume que es la 5ª columna)
+        const location = cells[7]?.dataset.location; // Supongamos que las coordenadas están almacenadas como `data-location` en la última columna
 
         if (location && urgency) {
-            const coords = location.split(" ").map(parseFloat);
-            const weight = getUrgencyWeight(urgency);
+            const coords = location.split(",").map(parseFloat); // Convertir a números
+            const weight = getUrgencyWeight(urgency); // Obtener el peso basado en la urgencia
 
             if (coords.length === 2 && weight > 0) {
-                heatmapData.push([...coords, weight]);
+                heatmapData.push([...coords, weight]); // Añadir [latitud, longitud, peso]
             }
         }
     });
 
-    return heatmapData;
+    console.log("Datos del mapa de calor extraídos de la tabla:", heatmapData);
+    return heatmapData; // Retorna los datos listos para el mapa de calor
 }
 
-// Función para actualizar el mapa de calor
+// Función para actualizar el mapa de calor desde los datos de la tabla
 function updateHeatmapFromTable() {
-    const heatmapData = getTableDataForHeatmap(); // Obtener datos desde la tabla
+    const heatmapData = getTableDataForHeatmap();
 
     if (!heatmapData.length) {
         alert("No hay datos disponibles para el mapa de calor.");
@@ -63,19 +71,22 @@ function updateHeatmapFromTable() {
     }
 
     if (!heatLayer) {
-        // Crear capa de mapa de calor si no existe
         heatLayer = L.heatLayer(heatmapData, {
-            radius: 20, // Radio de influencia
-            blur: 15, // Difusión
+            radius: 20,
+            blur: 15,
             maxZoom: 19,
-            gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' } // Gradiente de colores
+            gradient: {
+                0.4: 'blue',
+                0.65: 'lime',
+                1: 'red'
+            }
         }).addTo(map);
     } else {
-        heatLayer.setLatLngs(heatmapData); // Actualizar los datos en el mapa de calor existente
+        heatLayer.setLatLngs(heatmapData); // Actualizar los datos del mapa de calor
     }
 }
 
-// Función para alternar el mapa de calor
+// Función para alternar la visibilidad del mapa de calor
 function toggleHeatmap() {
     const heatmapButton = document.getElementById("toggle-heatmap");
 
@@ -88,30 +99,30 @@ function toggleHeatmap() {
             heatmapButton.textContent = "Desactivar Mapa de Calor";
         }
     } else {
-        updateHeatmapFromTable(); // Crear el mapa de calor si aún no existe
+        updateHeatmapFromTable();
         heatmapButton.textContent = "Desactivar Mapa de Calor";
     }
 }
 
-// Crear botón para el mapa de calor
+// Crear botón para el mapa de calor y agregarlo al mapa
 const heatmapControl = L.control({ position: "bottomright" });
 
-heatmapControl.onAdd = function (map) {
+heatmapControl.onAdd = function () {
     const div = L.DomUtil.create("div", "heatmap-control");
     div.innerHTML = `<button id="toggle-heatmap" class="heatmap-btn">Activar Mapa de Calor</button>`;
     div.style.padding = "10px";
     div.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
     div.style.borderRadius = "5px";
 
-    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.disableClickPropagation(div); // Evitar interferencia con el mapa
     return div;
 };
 
-// Agregar el control al mapa
+// Agregar control al mapa
 heatmapControl.addTo(map);
 
-// Manejar evento de clic en el botón del mapa de calor
-document.addEventListener("click", (event) => {
+// Evento para manejar clics en el botón del mapa de calor
+document.addEventListener("click", event => {
     if (event.target && event.target.id === "toggle-heatmap") {
         toggleHeatmap();
     }
