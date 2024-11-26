@@ -45,20 +45,22 @@ async function fetchHeatmapDataFromKobo() {
         data.results.forEach((report) => {
             const location = report.location; // Campo "location" en KoboToolbox
             const urgency = report.urgency_level; // Campo "urgency_level"
-
+        
             console.log("Procesando reporte:", { location, urgency }); // Depuración
-
+        
             if (location && urgency) {
-                const [lat, lon] = location.split("\t").slice(0, 2).map(parseFloat); // Extraer lat y lon (ignora altura y precisión)
+                // Separar por espacios y tomar solo latitud y longitud
+                const [lat, lon] = location.split(" ").slice(0, 2).map(parseFloat); 
                 const weight = getUrgencyWeight(urgency.toLowerCase()); // Obtener peso basado en urgencia
-
+        
                 console.log("Latitud:", lat, "Longitud:", lon, "Peso:", weight); // Depuración
-
-                if (lat && lon && weight > 0) {
+        
+                if (!isNaN(lat) && !isNaN(lon) && weight > 0) {
                     heatmapData.push([lat, lon, weight]); // Añadir [lat, lon, peso]
                 }
-            }
-        });
+        }
+});
+
 
         console.log("Datos del mapa de calor obtenidos de KoboToolbox:", heatmapData); // Verifica la salida final
         return heatmapData;
