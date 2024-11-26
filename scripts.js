@@ -5,9 +5,24 @@ const API_URL = window.location.hostname === 'localhost'
 
 let allReports = []; // Almacenar todos los reportes
 
-// Inicializar el mapa
-const map = L.map("map").setView([-37.47197, -72.34518], 17);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+// Inicializar el mapa con el centro y zoom bloqueado
+const map = L.map("map", {
+    center: [-37.47197, -72.34518], // Coordenadas del campus UDEC
+    zoom: 17, // Nivel de zoom inicial
+    maxZoom: 17, // Nivel máximo de zoom
+    minZoom: 17, // Nivel mínimo de zoom
+    zoomControl: false, // Deshabilitar el control de zoom
+    dragging: false, // Deshabilitar el arrastre del mapa
+    scrollWheelZoom: false, // Deshabilitar el zoom con la rueda del ratón
+    doubleClickZoom: false, // Deshabilitar el zoom con doble clic
+    boxZoom: false, // Deshabilitar el zoom de caja
+    keyboard: false // Deshabilitar controles del teclado
+});
+
+// Agregar la capa del mapa base
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, // Zoom máximo soportado por la capa base
+}).addTo(map);
 
 // Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
