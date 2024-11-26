@@ -8,9 +8,9 @@ let allReports = []; // Almacenar todos los reportes
 // Inicializar el mapa con el centro y zoom bloqueado
 const map = L.map("map", {
     center: [-37.47197, -72.34518], // Coordenadas del campus UDEC
-    zoom: 20, // Nivel de zoom inicial
-    maxZoom: 20, // Nivel máximo de zoom
-    minZoom: 20, // Nivel mínimo de zoom
+    zoom: 17, // Nivel de zoom inicial
+    maxZoom: 17, // Nivel máximo de zoom
+    minZoom: 17, // Nivel mínimo de zoom
     zoomControl: false, // Deshabilitar el control de zoom
     dragging: false, // Deshabilitar el arrastre del mapa
     scrollWheelZoom: false, // Deshabilitar el zoom con la rueda del ratón
@@ -29,22 +29,27 @@ document.getElementById("exportExcel").addEventListener("click", function () {
     // Seleccionar la tabla
     const table = document.getElementById("reportTable");
 
-    // Crear una hoja de Excel
+    if (!table) {
+        console.error("La tabla no se encuentra en el DOM.");
+        return;
+    }
+
+    // Crear una nueva hoja de Excel desde la tabla
     const worksheet = XLSX.utils.table_to_sheet(table, {
-        raw: true, // Mantener datos como números
-        cellDates: true, // Conservar formato de fechas
+        raw: true, // Mantener datos numéricos
+        cellDates: true, // Preservar fechas
     });
 
-    // Ignorar la columna de imágenes (última columna, columna G)
+    // Ignorar la columna de imágenes (última columna)
     Object.keys(worksheet).forEach((key) => {
-        if (key.startsWith("G")) delete worksheet[key];
+        if (key.startsWith("G")) delete worksheet[key]; // "G" corresponde a la columna de imágenes
     });
 
-    // Crear un libro de trabajo
+    // Crear el libro de Excel
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Reportes");
 
-    // Descargar el archivo Excel
+    // Descargar el archivo
     XLSX.writeFile(workbook, "reportes.xlsx");
 });
 
