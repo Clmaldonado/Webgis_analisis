@@ -168,14 +168,15 @@ main {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Estilo responsivo para tablas */
 #reportTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
-    overflow-x: auto;
-    display: block; /* Hace que la tabla sea desplazable */
-    white-space: nowrap; /* Previene el salto de línea de las celdas */
+    display: block; /* Hacer la tabla en bloque para permitir desplazamiento horizontal */
+    overflow-x: auto; /* Habilitar desplazamiento horizontal en pantallas pequeñas */
 }
+
 #reportTable thead {
     background: #1abc9c;
     color: white;
@@ -189,92 +190,92 @@ main {
     font-size: 0.9rem;
 }
 
-/* Responsividad */
+#reportTable th {
+    white-space: nowrap; /* Evitar que los encabezados se dividan */
+}
+
+/* Asegurarse de que la tabla se vea bien en dispositivos móviles */
 @media (max-width: 768px) {
-    main {
-        padding: 0.5rem;
+    #reportTable {
+        font-size: 0.8rem; /* Reducir el tamaño de fuente */
     }
 
-    #filters-section div {
+    #reportTable td {
+        white-space: nowrap; /* Evitar que las celdas se dividan */
+        overflow: hidden; /* Ocultar desbordamientos si es necesario */
+        text-overflow: ellipsis; /* Agregar puntos suspensivos a textos largos */
+    }
+
+    #reportTable th,
+    #reportTable td {
+        padding: 8px;
+    }
+}
+
+/* Alternativa para hacer que la tabla colapse en tarjetas para móviles */
+@media (max-width: 600px) {
+    #reportTable {
+        display: flex;
         flex-direction: column;
-    }
-
-    #filters-section label {
-        margin-bottom: 5px;
-    }
-
-    #filters-section input,
-    #filters-section select {
-        width: 100%;
-    }
-
-    #map {
-        height: 300px;
-    }
-
-    .legend {
-        font-size: 0.8rem;
-        padding: 8px 10px;
-    }
-
-    #statistics-section h2,
-    #table-section h2 {
-        font-size: 1.2rem;
-    }
-
-  #reportTable {
-        display: block; /* Hace la tabla en bloque */
         overflow-x: auto;
     }
 
     #reportTable thead {
-        display: none; /* Oculta el encabezado en móviles */
+        display: none; /* Ocultar encabezados */
     }
 
-    #reportTable tbody tr {
+    #reportTable tr {
         display: flex;
         flex-direction: column;
-        border: 1px solid #ddd;
         margin-bottom: 1rem;
+        border: 1px solid #ddd;
         padding: 10px;
-        border-radius: 10px;
         background: #fff;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     #reportTable td {
         display: flex;
         justify-content: space-between;
-        padding: 5px 0;
+        padding: 8px;
         font-size: 0.9rem;
+        border: none;
     }
 
-    #reportTable td::before {
-        content: attr(data-label); /* Usa el atributo data-label como encabezado */
+    #reportTable td:before {
+        content: attr(data-label); /* Usa los atributos data-label para etiquetas */
         font-weight: bold;
-        color: #333;
         margin-right: 10px;
-        flex-shrink: 0;
+        color: #333;
     }
 }
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.5rem;
-    }
 
-    #filters-section div {
-        flex-direction: column;
-    }
+/* Estilo general del botón */
+#exportExcel {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #1abc9c;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
 
-    #map {
-        height: 250px;
-    }
+/* Efecto hover */
+#exportExcel:hover {
+    background-color: #16a085;
+}
 
-    .legend {
-        display: none;
-    }
-
-    #reportTable th,
-    #reportTable td {
-        padding: 5px;
+/* Estilo responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+    #exportExcel {
+        font-size: 14px;
+        padding: 8px 15px;
+        width: 100%; /* Ocupa todo el ancho en móviles */
     }
 }
