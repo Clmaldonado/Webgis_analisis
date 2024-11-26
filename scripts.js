@@ -25,45 +25,47 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
-// Función para calcular peso según la urgencia
-function getUrgencyWeight(urgency_level) {
-    return urgency_level === "high" ? 3 : urgency_level === "medium" ? 2 : 1; // Pesos según gravedad
+// Función para calcular peso según la urgencia (urgency_level en inglés)
+function getUrgencyWeight(urgencyLevel) {
+    return urgencyLevel === "high" ? 3 : urgencyLevel === "medium" ? 2 : 1; // Pesos según gravedad
 }
 
-// Función para obtener peso según la urgencia
-function getUrgencyWeight(urgency) {
-    return urgency === "high" ? 3 : urgency === "medium" ? 2 : 1;
-}
+// Función para extraer datos de KoboToolbox
+async function fetchHeatmapDataFromKobo() {
+    try {
+        const response = await fetch(API_URL); // API_URL apunta a la fuente de datos de KoboToolbox
+        if (!response.ok) throw new Error(`Error al obtener datos: ${response.statusText}`);
 
-// Función para obtener datos de la tabla ya renderizada
-function getTableDataForHeatmap() {
-    const rows = document.querySelectorAll("#reportTable tbody tr");
-    const heatmapData = []; // Inicializa la lista para almacenar datos
+        const data = await response.json(); // Supone que los datos tienen un formato JSON
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        
-        // Asegúrate de que las columnas tengan los datos correctos
-        const urgency = cells[4]?.textContent?.toLowerCase(); // Columna de urgencia (asume que es la 5ª columna)
-        const location = cells[7]?.dataset.location; // Supongamos que las coordenadas están almacenadas como `data-location` en la última columna
+        const heatmapData = [];
 
-        if (location && urgency) {
-            const coords = location.split(",").map(parseFloat); // Convertir a números
-            const weight = getUrgencyWeight(urgency); // Obtener el peso basado en la urgencia
+        data.results.forEach((report) => {
+            const location = report.location; // Campo "location" en KoboToolbox
+            const urgency = report.urgency_level; // Campo "urgency_level"
 
-            if (coords.length === 2 && weight > 0) {
-                heatmapData.push([...coords, weight]); // Añadir [latitud, longitud, peso]
+            if (location && urgency) {
+                const [lat, lon] = location.split("\t").slice(0, 2).map(parseFloat); // Extraer lat y lon (ignora altura y precisión)
+                const weight = getUrgencyWeight(urgency.toLowerCase()); // Obtener peso basado en urgencia
+
+                if (lat && lon && weight > 0) {
+                    heatmapData.push([lat, lon, weight]); // Añadir [lat, lon, peso]
+                }
             }
-        }
-    });
+        });
 
-    console.log("Datos del mapa de calor extraídos de la tabla:", heatmapData);
-    return heatmapData; // Retorna los datos listos para el mapa de calor
+        console.log("Datos del mapa de calor obtenidos de KoboToolbox:", heatmapData);
+        return heatmapData;
+    } catch (error) {
+        console.error("Error al procesar los datos de KoboToolbox:", error);
+        alert("No se pudieron obtener los datos para el mapa de calor.");
+        return [];
+    }
 }
 
-// Función para actualizar el mapa de calor desde los datos de la tabla
-function updateHeatmapFromTable() {
-    const heatmapData = getTableDataForHeatmap();
+// Función para actualizar el mapa de calor con datos de KoboToolbox
+async function updateHeatmapFromKobo() {
+    const heatmapData = await fetchHeatmapDataFromKobo();
 
     if (!heatmapData.length) {
         alert("No hay datos disponibles para el mapa de calor.");
@@ -76,17 +78,17 @@ function updateHeatmapFromTable() {
             blur: 15,
             maxZoom: 19,
             gradient: {
-                0.4: 'blue',
-                0.65: 'lime',
-                1: 'red'
-            }
+                0.4: "blue",
+                0.65: "lime",
+                1: "red",
+            },
         }).addTo(map);
     } else {
-        heatLayer.setLatLngs(heatmapData); // Actualizar los datos del mapa de calor
+        heatLayer.setLatLngs(heatmapData); // Actualizar datos
     }
 }
 
-// Función para alternar la visibilidad del mapa de calor
+// Función para alternar el mapa de calor
 function toggleHeatmap() {
     const heatmapButton = document.getElementById("toggle-heatmap");
 
@@ -95,34 +97,34 @@ function toggleHeatmap() {
             map.removeLayer(heatLayer);
             heatmapButton.textContent = "Activar Mapa de Calor";
         } else {
-            updateHeatmapFromTable();
+            updateHeatmapFromKobo(); // Actualizar y mostrar mapa de calor
             heatmapButton.textContent = "Desactivar Mapa de Calor";
         }
     } else {
-        updateHeatmapFromTable();
+        updateHeatmapFromKobo(); // Crear el mapa de calor si no existe
         heatmapButton.textContent = "Desactivar Mapa de Calor";
     }
 }
 
-// Crear botón para el mapa de calor y agregarlo al mapa
+// Crear botón para alternar el mapa de calor
 const heatmapControl = L.control({ position: "bottomright" });
 
-heatmapControl.onAdd = function () {
+heatmapControl.onAdd = function (map) {
     const div = L.DomUtil.create("div", "heatmap-control");
     div.innerHTML = `<button id="toggle-heatmap" class="heatmap-btn">Activar Mapa de Calor</button>`;
     div.style.padding = "10px";
     div.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
     div.style.borderRadius = "5px";
 
-    L.DomEvent.disableClickPropagation(div); // Evitar interferencia con el mapa
+    L.DomEvent.disableClickPropagation(div);
     return div;
 };
 
-// Agregar control al mapa
+// Agregar el control al mapa
 heatmapControl.addTo(map);
 
-// Evento para manejar clics en el botón del mapa de calor
-document.addEventListener("click", event => {
+// Manejar evento del botón de mapa de calor
+document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "toggle-heatmap") {
         toggleHeatmap();
     }
