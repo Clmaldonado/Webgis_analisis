@@ -46,12 +46,13 @@ function toggleHeatmap() {
         }
     } else {
         console.error("El mapa de calor no se ha inicializado.");
+        alert("No hay datos disponibles para el mapa de calor.");
     }
 }
 
 // Función para actualizar la capa del mapa de calor
 function updateHeatmap(reports) {
-    const heatmapData = []; // Reiniciar los datos
+    const heatmapData = []; // Inicializa datos vacíos para el mapa de calor
 
     reports.forEach(report => {
         if (report.location && report.urgency_level) {
@@ -59,12 +60,12 @@ function updateHeatmap(reports) {
             const weight = getUrgencyWeight(report.urgency_level);
 
             if (coords.length >= 2 && weight > 0) {
-                heatmapData.push([coords[0], coords[1], weight]); // Agregar punto al mapa de calor
+                heatmapData.push([coords[0], coords[1], weight]); // Añade puntos con peso
             }
         }
     });
 
-    // Crear el mapa de calor si no existe o actualizarlo
+    // Verifica si ya existe la capa del mapa de calor
     if (!heatLayer) {
         heatLayer = L.heatLayer(heatmapData, {
             radius: 20,
@@ -77,7 +78,7 @@ function updateHeatmap(reports) {
             }
         });
     } else {
-        heatLayer.setLatLngs(heatmapData); // Actualizar datos del mapa de calor
+        heatLayer.setLatLngs(heatmapData); // Actualiza los datos si ya existe
     }
 }
 
@@ -102,13 +103,13 @@ heatmapControl.addTo(map);
 // Manejar el evento del botón de mapa de calor
 document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "toggle-heatmap") {
-        toggleHeatmap();
+        toggleHeatmap(); // Llama a la función al hacer clic en el botón
     }
 });
 
 // Llamar a `updateHeatmap` después de cargar los reportes
 async function displayReports() {
-    allReports = await fetchReports();
+    allReports = await fetchReports(); // Cargar todos los reportes
 
     const statistics = calculateStatistics(allReports);
     displayStatistics(statistics);
