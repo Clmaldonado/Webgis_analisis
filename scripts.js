@@ -8,9 +8,9 @@ let allReports = []; // Almacenar todos los reportes
 // Inicializar el mapa con el centro y zoom bloqueado
 const map = L.map("map", {
     center: [-37.47197, -72.34518], // Coordenadas del campus UDEC
-    zoom: 17, // Nivel de zoom inicial
-    maxZoom: 17, // Nivel máximo de zoom
-    minZoom: 17, // Nivel mínimo de zoom
+    zoom: 20, // Nivel de zoom inicial
+    maxZoom: 20, // Nivel máximo de zoom
+    minZoom: 20, // Nivel mínimo de zoom
     zoomControl: false, // Deshabilitar el control de zoom
     dragging: false, // Deshabilitar el arrastre del mapa
     scrollWheelZoom: false, // Deshabilitar el zoom con la rueda del ratón
