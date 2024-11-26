@@ -173,7 +173,7 @@ main {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
-    table-layout: fixed; /* Ajusta el tamaño de las columnas */
+    table-layout: auto; /* Ajuste automático del ancho */
 }
 
 #reportTable th,
@@ -182,39 +182,31 @@ main {
     padding: 10px;
     text-align: left;
     font-size: 0.9rem;
-    word-wrap: break-word; /* Ajusta el texto largo */
+    word-wrap: break-word; /* Para ajustar texto largo */
 }
 
-/* Encabezados visibles en pantallas grandes */
-#reportTable th {
-    background: #1abc9c;
-    color: white;
-    text-align: center;
-}
-
-/* Diseño responsivo para pantallas pequeñas */
+/* Estilo responsivo: mejor visualización en dispositivos móviles */
 @media screen and (max-width: 768px) {
-    #reportTable thead {
-        display: none; /* Ocultar encabezado en pantallas pequeñas */
+    #reportTable th {
+        background-color: #f1f1f1; /* Resaltar encabezados */
+        font-size: 0.9rem;
     }
-    #reportTable tr {
-        display: block;
-        margin-bottom: 15px; /* Separación entre filas */
-    }
+
     #reportTable td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        border: none;
-        border-bottom: 1px solid #ddd;
         font-size: 0.85rem;
+        word-wrap: break-word; /* Ajustar contenido largo */
     }
-    #reportTable td::before {
-        content: attr(data-label); /* Usa los atributos de los encabezados */
-        flex-basis: 50%; /* Toma la mitad del ancho */
-        font-weight: bold;
-        color: #333;
+
+    #reportTable {
+        display: block;
+        overflow-x: auto; /* Habilitar desplazamiento horizontal */
+        white-space: nowrap; /* Evitar que el contenido se desborde */
+    }
+
+    /* Aumentar legibilidad */
+    #reportTable td,
+    #reportTable th {
+        padding: 8px;
     }
 }
 
