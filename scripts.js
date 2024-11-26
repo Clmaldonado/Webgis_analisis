@@ -40,17 +40,22 @@ document.getElementById("exportExcel").addEventListener("click", function () {
         cellDates: true, // Preservar fechas
     });
 
-    // Eliminar la columna de imágenes (última columna)
+    // Ignorar la columna de imágenes (última columna)
     Object.keys(worksheet).forEach((key) => {
-        if (key.startsWith("H")) delete worksheet[key]; // "H" corresponde a la columna de imágenes
+        if (key.startsWith("G")) delete worksheet[key]; // "G" corresponde a la columna de imágenes
     });
 
     // Crear el libro de Excel
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Reportes");
 
-    // Descargar el archivo
-    XLSX.writeFile(workbook, "reportes.xlsx");
+    // Obtener la fecha de hoy en formato YYYY-MM-DD
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+
+    // Descargar el archivo con la fecha en el nombre
+    const filename = `reportes_${formattedDate}.xlsx`;
+    XLSX.writeFile(workbook, filename);
 });
 
 // Agregar leyenda al mapa
