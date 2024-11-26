@@ -1,0 +1,185 @@
+/* General Reset */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* Encabezado */
+header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    border-bottom: 4px solid #1abc9c;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Contenedor Principal */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Sección de Filtros */
+#filters-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+#filters-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+    color: #2c3e50;
+}
+
+#filters-section div {
+    margin-bottom: 1rem;
+}
+
+#filters-section label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #333;
+}
+
+#filters-section input[type="date"],
+#filters-section select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-right: 10px;
+    width: auto;
+}
+
+#filters-section button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #1abc9c;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#filters-section button:hover {
+    background-color: #16a085;
+}
+
+/* Mapa */
+#map-section {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+#map {
+    height: 500px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.legend {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95); /* Fondo blanco con transparencia */
+    padding: 10px 15px; /* Más espacio interno */
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    font-size: 0.9rem;
+    line-height: 1.5; /* Espaciado entre líneas */
+    color: #333;
+}
+
+.legend h4 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2c3e50; /* Color del texto del título */
+}
+
+.legend div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px; /* Espaciado entre los ítems */
+}
+
+.legend .color-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 10px; /* Espacio entre el círculo y el texto */
+    border-radius: 50%;
+    border: 1px solid #ddd; /* Borde para resaltar el color */
+}
+
+.legend .red {
+    background: red;
+}
+
+.legend .orange {
+    background: orange;
+}
+
+.legend .yellow {
+    background: yellow;
+}
+
+/* Estadísticas */
+#statistics-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+#statistics-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+    color: #2c3e50;
+}
+
+/* Tabla */
+#table-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#reportTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+#reportTable thead {
+    background: #1abc9c;
+    color: white;
+}
+
+#reportTable th,
+#reportTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 0.9rem;
+}
