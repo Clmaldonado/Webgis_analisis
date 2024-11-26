@@ -168,18 +168,12 @@ main {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo responsivo para tablas */
+/* Tablas responsivas */
 #reportTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
-    display: block; /* Hacer la tabla en bloque para permitir desplazamiento horizontal */
-    overflow-x: auto; /* Habilitar desplazamiento horizontal en pantallas pequeñas */
-}
-
-#reportTable thead {
-    background: #1abc9c;
-    color: white;
+    table-layout: fixed; /* Ajusta el tamaño de las columnas */
 }
 
 #reportTable th,
@@ -188,65 +182,38 @@ main {
     padding: 10px;
     text-align: left;
     font-size: 0.9rem;
+    word-wrap: break-word; /* Ajusta el texto largo */
 }
 
+/* Encabezados visibles en pantallas grandes */
 #reportTable th {
-    white-space: nowrap; /* Evitar que los encabezados se dividan */
+    background: #1abc9c;
+    color: white;
+    text-align: center;
 }
 
-/* Asegurarse de que la tabla se vea bien en dispositivos móviles */
-@media (max-width: 768px) {
-    #reportTable {
-        font-size: 0.8rem; /* Reducir el tamaño de fuente */
-    }
-
-    #reportTable td {
-        white-space: nowrap; /* Evitar que las celdas se dividan */
-        overflow: hidden; /* Ocultar desbordamientos si es necesario */
-        text-overflow: ellipsis; /* Agregar puntos suspensivos a textos largos */
-    }
-
-    #reportTable th,
-    #reportTable td {
-        padding: 8px;
-    }
-}
-
-/* Alternativa para hacer que la tabla colapse en tarjetas para móviles */
-@media (max-width: 600px) {
-    #reportTable {
-        display: flex;
-        flex-direction: column;
-        overflow-x: auto;
-    }
-
+/* Diseño responsivo para pantallas pequeñas */
+@media screen and (max-width: 768px) {
     #reportTable thead {
-        display: none; /* Ocultar encabezados */
+        display: none; /* Ocultar encabezado en pantallas pequeñas */
     }
-
     #reportTable tr {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1rem;
-        border: 1px solid #ddd;
-        padding: 10px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        display: block;
+        margin-bottom: 15px; /* Separación entre filas */
     }
-
     #reportTable td {
         display: flex;
         justify-content: space-between;
-        padding: 8px;
-        font-size: 0.9rem;
+        align-items: center;
+        padding: 10px;
         border: none;
+        border-bottom: 1px solid #ddd;
+        font-size: 0.85rem;
     }
-
-    #reportTable td:before {
-        content: attr(data-label); /* Usa los atributos data-label para etiquetas */
+    #reportTable td::before {
+        content: attr(data-label); /* Usa los atributos de los encabezados */
+        flex-basis: 50%; /* Toma la mitad del ancho */
         font-weight: bold;
-        margin-right: 10px;
         color: #333;
     }
 }
