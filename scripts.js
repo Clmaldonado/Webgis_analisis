@@ -40,9 +40,9 @@ document.getElementById("exportExcel").addEventListener("click", function () {
         cellDates: true, // Preservar fechas
     });
 
-    // Ignorar la columna de imágenes (última columna)
+    // Eliminar la columna de imágenes (última columna)
     Object.keys(worksheet).forEach((key) => {
-        if (key.startsWith("G")) delete worksheet[key]; // "G" corresponde a la columna de imágenes
+        if (key.startsWith("H")) delete worksheet[key]; // "H" corresponde a la columna de imágenes
     });
 
     // Crear el libro de Excel
@@ -90,6 +90,7 @@ async function fetchReports() {
         const data = await response.json();
 
         return data.results.map(report => ({
+            id: report._id, // Asegúrate de que la API retorne este campo
             report_name: report.report_name,
             email: report.email,
             location: report.location,
@@ -163,6 +164,7 @@ function renderTable(reports) {
     reports.forEach(report => {
         const row = document.createElement("tr");
         row.innerHTML = `
+            <td>${report.id || "N/A"}</td>
             <td>${report.report_name}</td>
             <td>${report.email}</td>
             <td>${report.issue_type}</td>
