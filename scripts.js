@@ -350,9 +350,8 @@ async function handleResolve(reportId) {
     console.log(`Intentando resolver reporte con ID: ${reportId}`);
 
     try {
-        // Enviar solicitud al servidor para actualizar el estado del reporte
         const response = await fetch(`/api/reports/${reportId}`, {
-            method: 'PUT',
+            method: 'PUT', // Cambia a 'PATCH' si es necesario
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -363,7 +362,10 @@ async function handleResolve(reportId) {
             throw new Error(`Error al resolver el reporte: ${response.statusText}`);
         }
 
-        // Actualizar las tablas y el mapa si la solicitud fue exitosa
+        const updatedReport = await response.json();
+        console.log('Reporte resuelto:', updatedReport);
+
+        // Actualizar frontend
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
         if (reportIndex !== -1) {
             const report = allReports[reportIndex];
@@ -372,10 +374,7 @@ async function handleResolve(reportId) {
             resolvedReports.push(report); // Mover a la lista de resueltos
             alert(`La afectación con ID: ${reportId} ha sido marcada como resuelta.`);
 
-            // Actualizar el mapa
-            renderMapMarkers(allReports); // Quitar el marcador del mapa principal
-
-            // Actualizar las tablas
+            renderMapMarkers(allReports); // Actualizar el mapa
             renderTable(allReports); // Actualizar tabla principal
             renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
         }
