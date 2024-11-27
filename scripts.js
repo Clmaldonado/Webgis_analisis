@@ -394,23 +394,24 @@ function renderResolvedTable(reports) {
 
 async function handleDelete(reportId) {
     try {
-        // Llamada a la API para eliminar el reporte en KoboToolbox
+        console.log("Intentando eliminar reporte con ID:", reportId);
         const response = await fetch(`${API_URL}/${reportId}`, {
             method: "DELETE",
         });
 
-        if (!response.ok) throw new Error(`Error al eliminar el reporte: ${response.statusText}`);
+        if (!response.ok) {
+            throw new Error(`Error al eliminar el reporte: ${response.status} ${response.statusText}`);
+        }
 
         // Actualizar lista y UI
         allReports = allReports.filter((r) => r.id !== reportId); // Remover del listado
         alert(`La afectación con ID: ${reportId} ha sido eliminada.`);
 
-        // Actualizar el mapa y las tablas
         renderMapMarkers(allReports); // Actualizar mapa
         renderTable(allReports); // Actualizar tabla
     } catch (error) {
         console.error("Error al eliminar el reporte:", error);
-        alert("No se pudo eliminar el reporte.");
+        alert(`Error al eliminar el reporte: ${error.message}`);
     }
 }
 
