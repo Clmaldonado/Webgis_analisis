@@ -347,31 +347,31 @@ let resolvedReports = [];
 
 // Función para manejar la resolución de un reporte
 async function handleResolve(reportId) {
-    console.log("Intentando resolver reporte con ID:", reportId); // Depuración
-    console.log("Lista de reportes:", allReports); // Mostrar todos los reportes
-
+    console.log("Intentando resolver reporte con ID:", reportId); // Verificar el ID
     const report = allReports.find((r) => r.id === reportId);
 
     if (!report) {
-        alert('El reporte no fue encontrado.');
+        alert("El reporte no fue encontrado.");
         return;
     }
 
     try {
-        // Enviar solicitud PUT para marcar como resuelto
+        console.log("Datos enviados al servidor:", { ...report, resolved: true }); // Depuración de datos enviados
         const response = await fetch(`/api/reports/${reportId}`, {
-            method: 'PUT',
+            method: "PUT",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
-            body: JSON.stringify({ ...report, resolved: true }), // Enviar todos los datos, incluyendo `resolved: true`
+            body: JSON.stringify({ ...report, resolved: true }), // Datos enviados al servidor
         });
 
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error HTTP: ${response.status} - ${errorText}`);
+        }
 
         alert(`El reporte con ID: ${reportId} se marcó como resuelto.`);
-
-        // Remover de la lista principal y actualizar la tabla
+        // Actualizar el frontend
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
         const resolvedReport = { ...allReports[reportIndex], resolved: true };
         allReports.splice(reportIndex, 1);
@@ -381,8 +381,8 @@ async function handleResolve(reportId) {
         renderTable(allReports); // Actualizar tabla de reportes
         renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
     } catch (error) {
-        console.error('Error al resolver el reporte:', error);
-        alert('Hubo un error al resolver el reporte.');
+        console.error("Error al resolver el reporte:", error);
+        alert("Hubo un error al resolver el reporte.");
     }
 }
 
