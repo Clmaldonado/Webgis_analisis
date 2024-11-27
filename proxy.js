@@ -49,27 +49,36 @@ app.delete('/api/reports/:id', async (req, res) => {
 
 // Ruta para manejar la API PUT (resolver un reporte)
 app.put('/api/reports/:id', async (req, res) => {
-    const reportId = req.params.id;
+    const { id } = req.params;
+    const updatedData = req.body; // Asegúrate de enviar el cuerpo de la solicitud
 
     try {
-        // Actualiza el reporte en KoboToolbox
-        const response = await axios.patch(`${API_URL}${reportId}/`, { resolved: true }, {
+        // Obtén el reporte original desde KoboToolbox
+        const originalResponse = await request.get(`${API_URL}${id}/`, {
             headers: {
                 Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
 
-        res.status(response.status).send({
-            message: `Reporte con ID ${reportId} resuelto.`,
-            data: response.data,
+        const originalData = originalResponse.data;
+
+        // Combina los datos originales con los actualizados
+        const updatedReport = { ...originalData, ...updatedData };
+
+        // Enviar el reporte actualizado de vuelta a la API
+        const response = await request.put(`${API_URL}${id}/`, updatedReport, {
+            headers: {
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+            },
         });
+
+        res.status(response.status).send(response.data);
     } catch (error) {
-        console.error(`Error al resolver el reporte con ID ${reportId}:`, error.response?.data || error.message);
-        res.status(error.response?.status || 500).send({
-            error: `Error al resolver el reporte con ID ${reportId}.`,
-        });
+        console.error(`Error al resolver el reporte con ID ${id}:`, error.response?.data || error.message);
+        res.status(error.response?.status || 500).send(error.response?.data || 'Error al resolver el reporte');
     }
 });
+
 
 // Ruta principal para servir `Webgis.html`
 app.get('/', (req, res) => {
