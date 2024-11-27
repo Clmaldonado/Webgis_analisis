@@ -48,37 +48,23 @@ app.delete('/api/reports/:id', async (req, res) => {
 });
 
 // Ruta para manejar la API PUT (resolver un reporte)
-app.put('/api/reports/:id', async (req, res) => {
-    const { id } = req.params;
-    const updatedData = req.body; // Asegúrate de enviar el cuerpo de la solicitud
+app.put('/api/reports/:id', (req, res) => {
+    const { id } = req.params; // Obtiene el ID del reporte
+    const updatedData = req.body; // Obtiene los datos enviados desde el cliente
 
-    try {
-        // Obtén el reporte original desde KoboToolbox
-        const originalResponse = await request.get(`${API_URL}${id}/`, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
-            },
-        });
+    console.log("ID recibido:", id); // Depuración del ID recibido
+    console.log("Datos actualizados recibidos:", updatedData); // Depuración de los datos recibidos
 
-        const originalData = originalResponse.data;
-
-        // Combina los datos originales con los actualizados
-        const updatedReport = { ...originalData, ...updatedData };
-
-        // Enviar el reporte actualizado de vuelta a la API
-        const response = await request.put(`${API_URL}${id}/`, updatedReport, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
-            },
-        });
-
-        res.status(response.status).send(response.data);
-    } catch (error) {
-        console.error(`Error al resolver el reporte con ID ${id}:`, error.response?.data || error.message);
-        res.status(error.response?.status || 500).send(error.response?.data || 'Error al resolver el reporte');
+    // Verifica si el reporte existe en la base de datos
+    const reportIndex = database.findIndex(report => report.id === id);
+    if (reportIndex === -1) {
+        return res.status(404).send({ error: "Reporte no encontrado" });
     }
-});
 
+    // Actualiza el reporte en la base de datos
+    database[reportIndex] = { ...database[reportIndex], ...updatedData };
+    res.status(200).send({ message: `Reporte con ID ${id} actualizado.` });
+});
 
 // Ruta principal para servir `Webgis.html`
 app.get('/', (req, res) => {
