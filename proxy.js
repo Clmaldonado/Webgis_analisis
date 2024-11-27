@@ -1,10 +1,13 @@
 const express = require('express');
-const axios = require('axios'); // Usando Axios en lugar de Request
+const axios = require('axios');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
+
+// Middleware para manejar JSON
+app.use(express.json());
 
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
@@ -14,7 +17,7 @@ app.get('/api', async (req, res) => {
     try {
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa variable de entorno para el token
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
         res.status(response.status).send(response.data);
@@ -26,12 +29,12 @@ app.get('/api', async (req, res) => {
 
 // Ruta para manejar la API DELETE (eliminar un reporte por ID)
 app.delete('/api/reports/:id', async (req, res) => {
-    const reportId = req.params.id; // Obtener el ID del reporte desde los parámetros
+    const reportId = req.params.id;
 
     try {
         const response = await axios.delete(`${API_URL}${reportId}/`, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa el token de KoboToolbox
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
 
@@ -40,6 +43,27 @@ app.delete('/api/reports/:id', async (req, res) => {
         console.error(`Error al eliminar el reporte con ID ${reportId}:`, error.response?.data || error.message);
         res.status(error.response?.status || 500).send({
             error: `Error al eliminar el reporte con ID ${reportId}.`,
+        });
+    }
+});
+
+// Ruta para manejar la API PUT (resolver un reporte)
+app.put('/api/reports/:id', async (req, res) => {
+    const reportId = req.params.id;
+    const updateData = { resolved: true }; // Marca como resuelto
+
+    try {
+        const response = await axios.patch(`${API_URL}${reportId}/`, updateData, {
+            headers: {
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+            },
+        });
+
+        res.status(response.status).send({ message: `Reporte con ID ${reportId} resuelto.`, data: response.data });
+    } catch (error) {
+        console.error(`Error al resolver el reporte con ID ${reportId}:`, error.response?.data || error.message);
+        res.status(error.response?.status || 500).send({
+            error: `Error al resolver el reporte con ID ${reportId}.`,
         });
     }
 });
