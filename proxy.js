@@ -1,10 +1,14 @@
 const express = require('express');
-const axios = require('axios');
+const cors = require('cors'); // Importar CORS
+const request = require('axios'); // Usando Axios en lugar de Request
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
+
+// Middleware para habilitar CORS
+app.use(cors()); // Permitir todas las solicitudes de todos los orígenes
 
 // Middleware para manejar JSON
 app.use(express.json());
