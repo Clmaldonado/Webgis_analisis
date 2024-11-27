@@ -25,9 +25,60 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
+// Función para generar puntos ficticios dentro del rectángulo
+function generateGridPoints(bounds, gridSize) {
+    const [southWest, northEast] = bounds; // Coordenadas del rectángulo
+    const points = [];
+    const latStep = (northEast[0] - southWest[0]) / gridSize; // Paso en latitud
+    const lonStep = (northEast[1] - southWest[1]) / gridSize; // Paso en longitud
+
+    for (let lat = southWest[0]; lat <= northEast[0]; lat += latStep) {
+        for (let lon = southWest[1]; lon <= northEast[1]; lon += lonStep) {
+            points.push([lat, lon, 1]); // Cada punto ficticio tiene peso base 1
+        }
+    }
+
+    return points;
+}
+
 // Función para calcular peso según la urgencia (urgency_level en inglés)
 function getUrgencyWeight(urgencyLevel) {
-    return urgencyLevel === "high" ? 3 : urgencyLevel === "medium" ? 2 : 1; // Pesos según gravedad
+    return urgencyLevel === "high" ? 4 : // Puntos con gravedad alta tienen peso 4
+           urgencyLevel === "medium" ? 3 : // Gravedad media: peso 3
+           urgencyLevel === "low" ? 2 : 1; // Gravedad baja: peso 2, ficticio: 1
+}
+
+// Función para actualizar el mapa de calor con datos de KoboToolbox
+async function updateHeatmapFromKobo() {
+    const heatmapData = await fetchHeatmapDataFromKobo();
+
+    if (!heatmapData.length) {
+        alert("No hay datos disponibles para el mapa de calor.");
+        return;
+    }
+
+    // Generar puntos ficticios en el área delimitada
+    const gridPoints = generateGridPoints(campusBounds, 50); // 50x50 puntos ficticios con peso base 1
+
+    // Combinar puntos reales con puntos ficticios
+    const combinedHeatmapData = [...gridPoints, ...heatmapData]; // Los datos reales sobrescriben a los ficticios
+
+    if (!heatLayer) {
+        heatLayer = L.heatLayer(combinedHeatmapData, {
+            radius: 20,
+            blur: 15,
+            maxZoom: 19,
+            gradient: {
+                0.2: "blue",
+                0.4: "lime",
+                0.6: "yellow",
+                0.8: "orange",
+                1: "red",
+            },
+        }).addTo(map);
+    } else {
+        heatLayer.setLatLngs(combinedHeatmapData); // Actualizar datos
+    }
 }
 
 // Función para extraer datos de KoboToolbox
@@ -45,22 +96,21 @@ async function fetchHeatmapDataFromKobo() {
         data.results.forEach((report) => {
             const location = report.location; // Campo "location" en KoboToolbox
             const urgency = report.urgency_level; // Campo "urgency_level"
-        
+
             console.log("Procesando reporte:", { location, urgency }); // Depuración
-        
+
             if (location && urgency) {
                 // Separar por espacios y tomar solo latitud y longitud
-                const [lat, lon] = location.split(" ").slice(0, 2).map(parseFloat); 
+                const [lat, lon] = location.split(" ").slice(0, 2).map(parseFloat);
                 const weight = getUrgencyWeight(urgency.toLowerCase()); // Obtener peso basado en urgencia
-        
+
                 console.log("Latitud:", lat, "Longitud:", lon, "Peso:", weight); // Depuración
-        
-                if (!isNaN(lat) && !isNaN(lon) && weight > 0) {
+
+                if (!isNaN(lat) && !isNaN(lon) && weight > 1) {
                     heatmapData.push([lat, lon, weight]); // Añadir [lat, lon, peso]
                 }
-        }
-});
-
+            }
+        });
 
         console.log("Datos del mapa de calor obtenidos de KoboToolbox:", heatmapData); // Verifica la salida final
         return heatmapData;
@@ -68,53 +118,6 @@ async function fetchHeatmapDataFromKobo() {
         console.error("Error al procesar los datos de KoboToolbox:", error);
         alert("No se pudieron obtener los datos para el mapa de calor.");
         return [];
-    }
-}
-
-// Función para generar puntos dentro del rectángulo
-function generateGridPoints(bounds, gridSize) {
-    const [southWest, northEast] = bounds; // Coordenadas del rectángulo
-    const points = [];
-    const latStep = (northEast[0] - southWest[0]) / gridSize; // Paso en latitud
-    const lonStep = (northEast[1] - southWest[1]) / gridSize; // Paso en longitud
-
-    for (let lat = southWest[0]; lat <= northEast[0]; lat += latStep) {
-        for (let lon = southWest[1]; lon <= northEast[1]; lon += lonStep) {
-            points.push([lat, lon, 0]); // Cada punto ficticio tiene peso 0
-        }
-    }
-
-    return points;
-}
-
-// Función para actualizar el mapa de calor en todo el rectángulo
-async function updateHeatmapFromKobo() {
-    const heatmapData = await fetchHeatmapDataFromKobo();
-
-    if (!heatmapData.length) {
-        alert("No hay datos disponibles para el mapa de calor.");
-        return;
-    }
-
-    // Generar puntos ficticios en el área delimitada
-    const gridPoints = generateGridPoints(campusBounds, 50); // 50x50 puntos ficticios con peso 0
-
-    // Combinar puntos reales con puntos ficticios
-    const combinedHeatmapData = [...gridPoints, ...heatmapData]; // Los datos reales tienen prioridad
-
-    if (!heatLayer) {
-        heatLayer = L.heatLayer(combinedHeatmapData, {
-            radius: 20,
-            blur: 15,
-            maxZoom: 19,
-            gradient: {
-                0.4: "blue",
-                0.65: "lime",
-                1: "red",
-            },
-        }).addTo(map);
-    } else {
-        heatLayer.setLatLngs(combinedHeatmapData); // Actualizar datos
     }
 }
 
