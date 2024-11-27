@@ -12,7 +12,7 @@ const map = L.map("map", {
     zoom: 18, // Nivel de zoom inicial
     maxZoom: 19, // Nivel máximo de zoom
     minZoom: 18, // Nivel mínimo de zoom
-    zoomControl: false, // Deshabilitar el control de zoom
+    zoomControl: true, // Control de zoom
     dragging: true, // Permitir arrastrar el mapa
     scrollWheelZoom: true, // Permitir zoom con la rueda del ratón
     doubleClickZoom: true, // Permitir zoom con doble clic
@@ -20,20 +20,35 @@ const map = L.map("map", {
     keyboard: true // Permitir controles del teclado
 });
 
-// Establecer los límites del mapa para evitar que se salga del área del campus
-const bounds = L.latLngBounds(
-    [-37.473, -72.346], // Coordenadas del suroeste (SW)
-    [-37.470, -72.344]  // Coordenadas del noreste (NE)
+// Definir los dos límites rectangulares
+const bounds1 = L.latLngBounds(
+    [-37.47151989522344, -72.34652807849588], // Esquina suroeste
+    [-37.47106606471147, -72.34403480482447]  // Esquina noreste
 );
 
-// Aplicar los límites al mapa
-map.setMaxBounds(bounds);
+const bounds2 = L.latLngBounds(
+    [-37.4727640749241, -72.34611450561441], // Esquina suroeste
+    [-37.47222547556444, -72.34365802101807]  // Esquina noreste
+);
 
-// Asegurarse de que el mapa "rebote" al centro si el usuario intenta desplazarse fuera
+// Función para verificar si un punto está dentro de los límites permitidos
+function isInsideBounds(latlng) {
+    return bounds1.contains(latlng) || bounds2.contains(latlng);
+}
+
+// Evento para limitar el movimiento del mapa
 map.on("drag", function () {
-    map.panInsideBounds(bounds, { animate: true });
+    const center = map.getCenter(); // Obtener el centro actual del mapa
+
+    if (!isInsideBounds(center)) {
+        // Si el centro está fuera de los límites permitidos, devuélvelo al área más cercana
+        const nearestBounds = bounds1.contains(center) ? bounds1 : bounds2;
+        map.panInsideBounds(nearestBounds, { animate: true });
+    }
 });
 
+// Aplicar un "rebote" al mapa si el usuario intenta alejarse demasiado
+map.setMaxBounds(L.latLngBounds(bounds1.getSouthWest(), bounds2.getNorthEast()));
 // Agregar la capa del mapa base
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
