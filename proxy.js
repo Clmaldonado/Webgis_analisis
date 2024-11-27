@@ -50,16 +50,19 @@ app.delete('/api/reports/:id', async (req, res) => {
 // Ruta para manejar la API PUT (resolver un reporte)
 app.put('/api/reports/:id', async (req, res) => {
     const reportId = req.params.id;
-    const updateData = { resolved: true }; // Marca como resuelto
 
     try {
-        const response = await axios.patch(`${API_URL}${reportId}/`, updateData, {
+        // Actualiza el reporte en KoboToolbox
+        const response = await axios.patch(`${API_URL}${reportId}/`, { resolved: true }, {
             headers: {
                 Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
 
-        res.status(response.status).send({ message: `Reporte con ID ${reportId} resuelto.`, data: response.data });
+        res.status(response.status).send({
+            message: `Reporte con ID ${reportId} resuelto.`,
+            data: response.data,
+        });
     } catch (error) {
         console.error(`Error al resolver el reporte con ID ${reportId}:`, error.response?.data || error.message);
         res.status(error.response?.status || 500).send({
