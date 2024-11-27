@@ -34,41 +34,35 @@ async function updateHeatmapDensity() {
         return;
     }
 
-    // Crear un mapa de calor donde cada reporte tenga el mismo peso (indica densidad de reportes)
-    const densityHeatmapData = heatmapData.map(([lat, lon]) => [lat, lon, 1]); // Peso 1 para todos los puntos
-
-    if (!heatLayer) {
-        heatLayer = L.heatLayer(densityHeatmapData, {
-            radius: 30, // Ajusta el tamaño de los puntos
-            blur: 25, // Ajusta el desenfoque para mayor suavidad
-            maxZoom: 19,
-            opacity: 0.75, // Opacidad del mapa de calor
-            gradient: {
-                0.4: "blue",
-                0.6: "lime",
-                0.8: "yellow",
-                1: "red",
-            },
-        }).addTo(map);
-    } else {
-        heatLayer.setLatLngs(densityHeatmapData); // Actualizar los datos
+   // Si la capa de calor ya existe, primero asegúrate de eliminarla del mapa antes de agregarla nuevamente
+    if (heatLayer) {
+        map.removeLayer(heatLayer); // Eliminar capa anterior si existe
     }
+
+    // Crear una nueva capa de calor con los datos actualizados
+    heatLayer = L.heatLayer(heatmapData.map(([lat, lon]) => [lat, lon, 1]), {
+        radius: 30, // Ajusta el tamaño de los puntos
+        blur: 25, // Ajusta el desenfoque para mayor suavidad
+        maxZoom: 19,
+        opacity: 0.75, // Opacidad del mapa de calor
+        gradient: {
+            0.4: "blue",
+            0.6: "lime",
+            0.8: "yellow",
+            1: "red",
+        },
+    }).addTo(map); // Agregar la nueva capa al mapa
 }
 
 // Función para alternar el mapa de calor de densidad
 function toggleDensityHeatmap() {
     const heatmapButton = document.getElementById("toggle-heatmap");
 
-    if (heatLayer) {
-        if (map.hasLayer(heatLayer)) {
-            map.removeLayer(heatLayer);
-            heatmapButton.textContent = "Activar Mapa de Densidad";
-        } else {
-            updateHeatmapDensity(); // Mostrar el mapa de densidad
-            heatmapButton.textContent = "Desactivar Mapa de Densidad";
-        }
+    if (heatLayer && map.hasLayer(heatLayer)) {
+        map.removeLayer(heatLayer); // Ocultar mapa de calor
+        heatmapButton.textContent = "Activar Mapa de Densidad";
     } else {
-        updateHeatmapDensity(); // Crear el mapa de densidad si no existe
+        updateHeatmapDensity(); // Mostrar mapa de calor
         heatmapButton.textContent = "Desactivar Mapa de Densidad";
     }
 }
