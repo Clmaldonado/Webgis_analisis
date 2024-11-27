@@ -54,6 +54,14 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
+// URL del formulario de KoboToolbox
+const FORM_URL = "https://kf.kobotoolbox.org/forms/YOUR_FORM_ID_HERE"; // Reemplaza con la URL de tu formulario
+
+// Agregar evento al botón para abrir el formulario
+document.getElementById("openFormButton").addEventListener("click", () => {
+    window.open(FORM_URL, "_blank"); // Abrir el formulario en una nueva pestaña
+});
+
 // Función para generar un mapa de calor basado en la densidad de reportes
 async function updateHeatmapDensity() {
     const heatmapData = await fetchHeatmapDataFromKobo();
@@ -225,9 +233,16 @@ async function fetchReports() {
             report_name: report.report_name,
             email: report.email,
             location: report.location,
-            issue_type: report.issue_type === "structural" ? "Falla estructural" : report.issue_type,
+            // Traducción de tipos de problema
+            issue_type: report.issue_type === "structural" ? "Falla estructural" :
+                        report.issue_type === "electrical" ? "Problema eléctrico" :
+                        report.issue_type === "landscaping" ? "Daño en áreas verdes" :
+                        report.issue_type === "other" ? "Otro" :
+                        report.issue_type, // Si no coincide, dejar el valor original
+            // Traducción de urgencia
             urgency_level: report.urgency_level === "low" ? "Bajo" :
-                           report.urgency_level === "medium" ? "Medio" : "Alto",
+                           report.urgency_level === "medium" ? "Medio" :
+                           "Alto", // Si no coincide, se considera "Alto" por defecto
             detection_date: report.detection_date,
             issue_description: report.issue_description,
             photo_evidence: report._attachments?.[0]?.download_medium_url || null,
