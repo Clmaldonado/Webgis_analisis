@@ -6,10 +6,10 @@ const API_URL = window.location.hostname === 'localhost'
 let allReports = []; // Almacenar todos los reportes
 let heatLayer; // Variable para almacenar la capa del mapa de calor
 
-// Inicializar el mapa con el centro y zoom ajustado
+// Inicializar el mapa con el centro y zoom bloqueado dentro de un área
 const map = L.map("map", {
-    center: [-37.47197, -72.34518], // Coordenadas del campus UDEC
-    zoom: 17, // Cambia el nivel de zoom aquí (prueba con 17 o 18)
+    center: [-37.47197, -72.34518], // Coordenadas del centro del campus UDEC
+    zoom: 17, // Nivel de zoom inicial
     maxZoom: 19, // Nivel máximo de zoom
     minZoom: 16, // Nivel mínimo de zoom
     zoomControl: false, // Deshabilitar el control de zoom
@@ -18,6 +18,20 @@ const map = L.map("map", {
     doubleClickZoom: true, // Permitir zoom con doble clic
     boxZoom: true, // Permitir zoom de caja
     keyboard: true // Permitir controles del teclado
+});
+
+// Establecer los límites del mapa para evitar que se salga del área del campus
+const bounds = L.latLngBounds(
+    [-37.473, -72.347], // Coordenadas del suroeste (SW)
+    [-37.470, -72.343]  // Coordenadas del noreste (NE)
+);
+
+// Aplicar los límites al mapa
+map.setMaxBounds(bounds);
+
+// Asegurarse de que el mapa "rebote" al centro si el usuario intenta desplazarse fuera
+map.on("drag", function () {
+    map.panInsideBounds(bounds, { animate: true });
 });
 
 // Agregar la capa del mapa base
