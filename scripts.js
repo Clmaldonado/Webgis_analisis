@@ -392,10 +392,13 @@ function renderResolvedTable(reports) {
 }
 
 
+// Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
     try {
         console.log(`Intentando eliminar reporte con ID: ${reportId}`);
-        const response = await fetch(`${API_URL}/reports/${reportId}`, {
+        
+        // Solicitud DELETE al servidor
+        const response = await fetch(`${API_URL}/reports/${reportId}`, { // Ajusta `/reports/` si tu endpoint espera otro formato
             method: 'DELETE',
         });
 
@@ -404,10 +407,55 @@ async function handleDelete(reportId) {
         }
 
         console.log(`Reporte con ID ${reportId} eliminado correctamente.`);
-        // Lógica para actualizar la tabla y el mapa
+
+        // Actualiza la tabla y elimina el marcador correspondiente
+        removeReportFromTable(reportId);
+        removeMarkerFromMap(reportId);
+
+        alert(`Reporte con ID ${reportId} eliminado exitosamente.`);
     } catch (error) {
         console.error("Error al eliminar el reporte:", error);
-        alert("No se pudo eliminar el reporte.");
+        alert("No se pudo eliminar el reporte. Verifica la consola para más detalles.");
+    }
+}
+
+// Función para eliminar un reporte de la tabla
+function removeReportFromTable(reportId) {
+    const rows = document.querySelectorAll("#reportTable tbody tr");
+    rows.forEach(row => {
+        const cell = row.querySelector("td"); // Suponiendo que la primera celda contiene el ID
+        if (cell && cell.textContent === reportId) {
+            row.remove(); // Elimina la fila correspondiente
+        }
+    });
+    console.log(`Reporte con ID ${reportId} eliminado de la tabla.`);
+}
+
+// Función para eliminar el marcador del mapa
+function removeMarkerFromMap(reportId) {
+    map.eachLayer(layer => {
+        if (layer instanceof L.Marker && layer.options.reportId === reportId) {
+            map.removeLayer(layer); // Elimina el marcador correspondiente
+        }
+    });
+    console.log(`Reporte con ID ${reportId} eliminado del mapa.`);
+}
+
+// Función para agregar un marcador al mapa con botón de eliminar
+function addMarker(report) {
+    const coords = report.location.split(" ").map(parseFloat);
+    if (coords.length >= 2) {
+        const marker = L.marker([coords[0], coords[1]], {
+            reportId: report.id, // Asociar el marcador al ID del reporte
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <b>${report.report_name}</b><br>
+            <b>Tipo:</b> ${report.issue_type}<br>
+            <b>Descripción:</b> ${report.issue_description}<br>
+            <b>Urgencia:</b> ${report.urgency_level}<br>
+            <button onclick="handleDelete('${report.id}')">Eliminar</button>
+        `);
     }
 }
 
