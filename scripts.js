@@ -25,31 +25,8 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
-// Función para generar puntos ficticios dentro del rectángulo
-function generateGridPoints(bounds, gridSize) {
-    const [southWest, northEast] = bounds; // Coordenadas del rectángulo
-    const points = [];
-    const latStep = (northEast[0] - southWest[0]) / gridSize; // Paso en latitud
-    const lonStep = (northEast[1] - southWest[1]) / gridSize; // Paso en longitud
-
-    for (let lat = southWest[0]; lat <= northEast[0]; lat += latStep) {
-        for (let lon = southWest[1]; lon <= northEast[1]; lon += lonStep) {
-            points.push([lat, lon, 1]); // Cada punto ficticio tiene peso base 1
-        }
-    }
-
-    return points;
-}
-
-// Función para calcular peso según la urgencia (urgency_level en inglés)
-function getUrgencyWeight(urgencyLevel) {
-    return urgencyLevel === "high" ? 4 : // Puntos con gravedad alta tienen peso 4
-           urgencyLevel === "medium" ? 3 : // Gravedad media: peso 3
-           urgencyLevel === "low" ? 2 : 1; // Gravedad baja: peso 2, ficticio: 1
-}
-
-// Función para actualizar el mapa de calor con datos de KoboToolbox
-async function updateHeatmapFromKobo() {
+// Función para generar un mapa de calor basado en la densidad de reportes
+async function updateHeatmapDensity() {
     const heatmapData = await fetchHeatmapDataFromKobo();
 
     if (!heatmapData.length) {
@@ -57,82 +34,51 @@ async function updateHeatmapFromKobo() {
         return;
     }
 
-    // Generar puntos ficticios en el área delimitada
-    const gridPoints = generateGridPoints(campusBounds, 50); // 50x50 puntos ficticios con peso base 1
-
-    // Combinar puntos reales con puntos ficticios
-    const combinedHeatmapData = [...gridPoints, ...heatmapData]; // Los datos reales sobrescriben a los ficticios
+    // Crear un mapa de calor donde cada reporte tenga el mismo peso (indica densidad de reportes)
+    const densityHeatmapData = heatmapData.map(([lat, lon]) => [lat, lon, 1]); // Peso 1 para todos los puntos
 
     if (!heatLayer) {
-        heatLayer = L.heatLayer(combinedHeatmapData, {
-            radius: 20,
-            blur: 15,
+        heatLayer = L.heatLayer(densityHeatmapData, {
+            radius: 30, // Ajusta el tamaño de los puntos
+            blur: 25, // Ajusta el desenfoque para mayor suavidad
             maxZoom: 19,
+            opacity: 0.75, // Opacidad del mapa de calor
             gradient: {
-                0.2: "blue",
-                0.4: "lime",
-                0.6: "yellow",
-                0.8: "orange",
+                0.4: "blue",
+                0.6: "lime",
+                0.8: "yellow",
                 1: "red",
             },
         }).addTo(map);
     } else {
-        heatLayer.setLatLngs(combinedHeatmapData); // Actualizar datos
+        heatLayer.setLatLngs(densityHeatmapData); // Actualizar los datos
     }
 }
 
-// Función para extraer datos de KoboToolbox
-async function fetchHeatmapDataFromKobo() {
-    try {
-        const response = await fetch(API_URL); // API_URL apunta a la fuente de datos de KoboToolbox
-        if (!response.ok) throw new Error(`Error al obtener datos: ${response.statusText}`);
+// Función para alternar el mapa de calor de densidad
+function toggleDensityHeatmap() {
+    const heatmapButton = document.getElementById("toggle-heatmap");
 
-        const data = await response.json(); // Supone que los datos tienen un formato JSON
-
-        console.log("Datos obtenidos de KoboToolbox:", data); // Depuración
-
-        const heatmapData = [];
-
-        data.results.forEach((report) => {
-            const location = report.location; // Campo "location" en KoboToolbox
-            const urgency = report.urgency_level; // Campo "urgency_level"
-
-            console.log("Procesando reporte:", { location, urgency }); // Depuración
-
-            if (location && urgency) {
-                // Separar por espacios y tomar solo latitud y longitud
-                const [lat, lon] = location.split(" ").slice(0, 2).map(parseFloat);
-                const weight = getUrgencyWeight(urgency.toLowerCase()); // Obtener peso basado en urgencia
-
-                console.log("Latitud:", lat, "Longitud:", lon, "Peso:", weight); // Depuración
-
-                if (!isNaN(lat) && !isNaN(lon) && weight > 1) {
-                    heatmapData.push([lat, lon, weight]); // Añadir [lat, lon, peso]
-                }
-            }
-        });
-
-        console.log("Datos del mapa de calor obtenidos de KoboToolbox:", heatmapData); // Verifica la salida final
-        return heatmapData;
-    } catch (error) {
-        console.error("Error al procesar los datos de KoboToolbox:", error);
-        alert("No se pudieron obtener los datos para el mapa de calor.");
-        return [];
+    if (heatLayer) {
+        if (map.hasLayer(heatLayer)) {
+            map.removeLayer(heatLayer);
+            heatmapButton.textContent = "Activar Mapa de Densidad";
+        } else {
+            updateHeatmapDensity(); // Mostrar el mapa de densidad
+            heatmapButton.textContent = "Desactivar Mapa de Densidad";
+        }
+    } else {
+        updateHeatmapDensity(); // Crear el mapa de densidad si no existe
+        heatmapButton.textContent = "Desactivar Mapa de Densidad";
     }
 }
 
-// Delimitación del campus
-const campusBounds = [
-    [-37.473, -72.347], // Coordenadas suroeste del rectángulo
-    [-37.471, -72.343], // Coordenadas noreste del rectángulo
-];
+// Crear botón para alternar el mapa de densidad
+const densityHeatmapControl = L.control({ position: "bottomright" });
 
-// Crear botón para alternar el mapa de calor
-const heatmapControl = L.control({ position: "bottomright" });
-
-heatmapControl.onAdd = function (map) {
+densityHeatmapControl.onAdd = function (map) {
     const div = L.DomUtil.create("div", "heatmap-control");
-    div.innerHTML = `<button id="toggle-heatmap" class="heatmap-btn">Activar Mapa de Calor</button>`;
+    div.innerHTML = `<button id="toggle-heatmap" class="heatmap-btn">Activar Mapa de Densidad</button>`;
     div.style.padding = "10px";
     div.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
     div.style.borderRadius = "5px";
@@ -142,30 +88,42 @@ heatmapControl.onAdd = function (map) {
 };
 
 // Agregar el control al mapa
-heatmapControl.addTo(map);
+densityHeatmapControl.addTo(map);
 
-// Manejar evento del botón de mapa de calor
+// Manejar evento del botón de mapa de densidad
 document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "toggle-heatmap") {
-        toggleHeatmap();
+        toggleDensityHeatmap();
     }
 });
 
-// Función para alternar el mapa de calor
-function toggleHeatmap() {
-    const heatmapButton = document.getElementById("toggle-heatmap");
+// Función para extraer datos de KoboToolbox con solo latitud y longitud
+async function fetchHeatmapDataFromKobo() {
+    try {
+        const response = await fetch(API_URL); // API_URL apunta a la fuente de datos de KoboToolbox
+        if (!response.ok) throw new Error(`Error al obtener datos: ${response.statusText}`);
 
-    if (heatLayer) {
-        if (map.hasLayer(heatLayer)) {
-            map.removeLayer(heatLayer);
-            heatmapButton.textContent = "Activar Mapa de Calor";
-        } else {
-            updateHeatmapFromKobo(); // Actualizar y mostrar mapa de calor
-            heatmapButton.textContent = "Desactivar Mapa de Calor";
-        }
-    } else {
-        updateHeatmapFromKobo(); // Crear el mapa de calor si no existe
-        heatmapButton.textContent = "Desactivar Mapa de Calor";
+        const data = await response.json();
+
+        const heatmapData = [];
+
+        data.results.forEach((report) => {
+            const location = report.location; // Campo "location" en KoboToolbox
+            if (location) {
+                // Separar por espacios y tomar solo latitud y longitud
+                const [lat, lon] = location.split(" ").slice(0, 2).map(parseFloat);
+
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    heatmapData.push([lat, lon]); // Agregar solo latitud y longitud
+                }
+            }
+        });
+
+        return heatmapData;
+    } catch (error) {
+        console.error("Error al procesar los datos de KoboToolbox:", error);
+        alert("No se pudieron obtener los datos para el mapa de densidad.");
+        return [];
     }
 }
 
