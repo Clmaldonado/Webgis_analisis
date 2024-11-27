@@ -9,9 +9,9 @@ let heatLayer; // Variable para almacenar la capa del mapa de calor
 // Inicializar el mapa con el centro y zoom bloqueado dentro de un área
 const map = L.map("map", {
     center: [-37.47197, -72.34518], // Coordenadas del centro del campus UDEC
-    zoom: 17, // Nivel de zoom inicial
+    zoom: 18, // Nivel de zoom inicial
     maxZoom: 19, // Nivel máximo de zoom
-    minZoom: 16, // Nivel mínimo de zoom
+    minZoom: 18, // Nivel mínimo de zoom
     zoomControl: false, // Deshabilitar el control de zoom
     dragging: true, // Permitir arrastrar el mapa
     scrollWheelZoom: true, // Permitir zoom con la rueda del ratón
@@ -22,8 +22,8 @@ const map = L.map("map", {
 
 // Establecer los límites del mapa para evitar que se salga del área del campus
 const bounds = L.latLngBounds(
-    [-37.473, -72.347], // Coordenadas del suroeste (SW)
-    [-37.470, -72.343]  // Coordenadas del noreste (NE)
+    [-37.473, -72.346], // Coordenadas del suroeste (SW)
+    [-37.470, -72.344]  // Coordenadas del noreste (NE)
 );
 
 // Aplicar los límites al mapa
