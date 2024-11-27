@@ -6,18 +6,18 @@ const API_URL = window.location.hostname === 'localhost'
 let allReports = []; // Almacenar todos los reportes
 let heatLayer; // Variable para almacenar la capa del mapa de calor
 
-// Inicializar el mapa con el centro y zoom bloqueado
+// Inicializar el mapa con el centro y zoom ajustado
 const map = L.map("map", {
     center: [-37.47197, -72.34518], // Coordenadas del campus UDEC
-    zoom: 19, // Nivel de zoom inicial (más cercano)
-    maxZoom: 19, // Nivel máximo de zoom (puedes ajustar según lo que necesites)
-    minZoom: 19, // Nivel mínimo de zoom (para mantenerlo fijo)
+    zoom: 17, // Cambia el nivel de zoom aquí (prueba con 17 o 18)
+    maxZoom: 19, // Nivel máximo de zoom
+    minZoom: 16, // Nivel mínimo de zoom
     zoomControl: false, // Deshabilitar el control de zoom
-    dragging: false, // Deshabilitar el arrastre del mapa
-    scrollWheelZoom: false, // Deshabilitar el zoom con la rueda del ratón
-    doubleClickZoom: false, // Deshabilitar el zoom con doble clic
-    boxZoom: false, // Deshabilitar el zoom de caja
-    keyboard: false // Deshabilitar controles del teclado
+    dragging: true, // Permitir arrastrar el mapa
+    scrollWheelZoom: true, // Permitir zoom con la rueda del ratón
+    doubleClickZoom: true, // Permitir zoom con doble clic
+    boxZoom: true, // Permitir zoom de caja
+    keyboard: true // Permitir controles del teclado
 });
 
 // Agregar la capa del mapa base
