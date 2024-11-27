@@ -342,26 +342,48 @@ function renderTable(reports) {
     });
 }
 
-function handleResolve(reportId) {
-    const reportIndex = allReports.findIndex((r) => r.id === reportId);
-    if (reportIndex !== -1) {
-        const report = allReports[reportIndex];
-        report.resolved = true; // Marcar como resuelto
-        allReports.splice(reportIndex, 1); // Remover de la lista principal
-        resolvedReports.push(report); // Mover a la lista de resueltos
-        alert(`La afectación con ID: ${reportId} ha sido marcada como resuelta.`);
-
-        // Actualizar el mapa
-        renderMapMarkers(allReports); // Quitar el marcador del mapa principal
-
-        // Actualizar las tablas
-        renderTable(allReports); // Actualizar tabla principal
-        renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
-    }
-}
-
 // Crear una lista para las afectaciones resueltas
 let resolvedReports = [];
+
+// Función para manejar la resolución de un reporte
+async function handleResolve(reportId) {
+    console.log(`Intentando resolver reporte con ID: ${reportId}`);
+
+    try {
+        // Enviar solicitud al servidor para actualizar el estado del reporte
+        const response = await fetch(`/api/reports/${reportId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ resolved: true }), // Enviar datos adicionales si es necesario
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al resolver el reporte: ${response.statusText}`);
+        }
+
+        // Actualizar las tablas y el mapa si la solicitud fue exitosa
+        const reportIndex = allReports.findIndex((r) => r.id === reportId);
+        if (reportIndex !== -1) {
+            const report = allReports[reportIndex];
+            report.resolved = true; // Marcar como resuelto en el frontend
+            allReports.splice(reportIndex, 1); // Remover de la lista principal
+            resolvedReports.push(report); // Mover a la lista de resueltos
+            alert(`La afectación con ID: ${reportId} ha sido marcada como resuelta.`);
+
+            // Actualizar el mapa
+            renderMapMarkers(allReports); // Quitar el marcador del mapa principal
+
+            // Actualizar las tablas
+            renderTable(allReports); // Actualizar tabla principal
+            renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
+        }
+    } catch (error) {
+        console.error('Error al resolver el reporte:', error);
+        alert('No se pudo resolver el reporte.');
+    }
+}
 
 // Función para renderizar la tabla de resueltos
 function renderResolvedTable(reports) {
@@ -390,7 +412,6 @@ function renderResolvedTable(reports) {
         resolvedTableBody.appendChild(row);
     });
 }
-
 
 // Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
