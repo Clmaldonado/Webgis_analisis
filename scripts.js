@@ -160,7 +160,6 @@ async function fetchHeatmapDataFromKobo() {
 
 // Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
-    // Seleccionar la tabla
     const table = document.getElementById("reportTable");
 
     if (!table) {
@@ -168,28 +167,28 @@ document.getElementById("exportExcel").addEventListener("click", function () {
         return;
     }
 
-    // Crear una nueva hoja de Excel desde la tabla
-    const worksheet = XLSX.utils.table_to_sheet(table, {
-        raw: true, // Mantener datos numéricos
-        cellDates: true, // Preservar fechas
-    });
+    // Crear una copia de los datos con el estado resuelto incluido
+    const exportData = allReports.map((report) => ({
+        ID: report.id || "N/A",
+        Nombre: report.report_name,
+        Correo: report.email,
+        "Tipo de Afectación": report.issue_type,
+        Urgencia: report.urgency_level,
+        Fecha: report.detection_date,
+        Descripción: report.issue_description || "No disponible",
+        Estado: report.resolved ? "Resuelto" : "Pendiente", // Añadir columna de estado
+    }));
 
-    // Ignorar la columna de imágenes (última columna)
-    Object.keys(worksheet).forEach((key) => {
-        if (key.startsWith("G")) delete worksheet[key]; // "G" corresponde a la columna de imágenes
-    });
+    // Crear una nueva hoja de Excel
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
 
-    // Crear el libro de Excel
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Reportes");
 
-    // Obtener la fecha de hoy en formato YYYY-MM-DD
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+    const formattedDate = today.toISOString().split("T")[0]; // Formato: YYYY-MM-DD
 
-    // Descargar el archivo con la fecha en el nombre
-    const filename = `reportes_${formattedDate}.xlsx`;
-    XLSX.writeFile(workbook, filename);
+    XLSX.writeFile(workbook, `reportes_${formattedDate}.xlsx`);
 });
 
 // Agregar leyenda al mapa
@@ -325,11 +324,38 @@ function renderTable(reports) {
                        </a>` 
                     : "No disponible"}
             </td>
+            <td>
+                <button class="resolve-btn" data-id="${report.id}">Resolver</button>
+                <button class="delete-btn" data-id="${report.id}">Eliminar</button>
+            </td>
         `;
         tableBody.appendChild(row);
     });
+
+    // Añadir eventos a los botones de resolver/eliminar
+    document.querySelectorAll(".resolve-btn").forEach((button) => {
+        button.addEventListener("click", (e) => handleResolve(e.target.dataset.id));
+    });
+
+    document.querySelectorAll(".delete-btn").forEach((button) => {
+        button.addEventListener("click", (e) => handleDelete(e.target.dataset.id));
+    });
 }
 
+function handleResolve(reportId) {
+    const report = allReports.find((r) => r.id === reportId);
+    if (report) {
+        report.resolved = true; // Marcar como resuelto
+        alert(`La afectación con ID: ${reportId} ha sido marcada como resuelta.`);
+        renderTable(allReports); // Volver a renderizar la tabla
+    }
+}
+
+function handleDelete(reportId) {
+    allReports = allReports.filter((r) => r.id !== reportId); // Filtrar para eliminar
+    alert(`La afectación con ID: ${reportId} ha sido eliminada.`);
+    renderTable(allReports); // Volver a renderizar la tabla
+}
 
 // Función para aplicar filtros
 function applyFilters() {
