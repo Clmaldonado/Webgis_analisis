@@ -160,14 +160,6 @@ async function fetchHeatmapDataFromKobo() {
 
 // Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
-    const table = document.getElementById("reportTable");
-
-    if (!table) {
-        console.error("La tabla no se encuentra en el DOM.");
-        return;
-    }
-
-    // Crear una copia de los datos con el estado resuelto incluido
     const exportData = allReports.map((report) => ({
         ID: report.id || "N/A",
         Nombre: report.report_name,
@@ -176,18 +168,26 @@ document.getElementById("exportExcel").addEventListener("click", function () {
         Urgencia: report.urgency_level,
         Fecha: report.detection_date,
         Descripción: report.issue_description || "No disponible",
-        Estado: report.resolved ? "Resuelto" : "Pendiente", // Añadir columna de estado
+        Estado: "Pendiente",
     }));
 
-    // Crear una nueva hoja de Excel
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const resolvedData = resolvedReports.map((report) => ({
+        ID: report.id || "N/A",
+        Nombre: report.report_name,
+        Correo: report.email,
+        "Tipo de Afectación": report.issue_type,
+        Urgencia: report.urgency_level,
+        Fecha: report.detection_date,
+        Descripción: report.issue_description || "No disponible",
+        Estado: "Resuelto",
+    }));
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Reportes");
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(exportData), "Pendientes");
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(resolvedData), "Resueltos");
 
     const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0]; // Formato: YYYY-MM-DD
-
+    const formattedDate = today.toISOString().split("T")[0];
     XLSX.writeFile(workbook, `reportes_${formattedDate}.xlsx`);
 });
 
@@ -343,18 +343,75 @@ function renderTable(reports) {
 }
 
 function handleResolve(reportId) {
-    const report = allReports.find((r) => r.id === reportId);
-    if (report) {
+    const reportIndex = allReports.findIndex((r) => r.id === reportId);
+    if (reportIndex !== -1) {
+        const report = allReports[reportIndex];
         report.resolved = true; // Marcar como resuelto
+        allReports.splice(reportIndex, 1); // Remover de la lista principal
+        resolvedReports.push(report); // Mover a la lista de resueltos
         alert(`La afectación con ID: ${reportId} ha sido marcada como resuelta.`);
-        renderTable(allReports); // Volver a renderizar la tabla
+
+        // Actualizar el mapa
+        renderMapMarkers(allReports); // Quitar el marcador del mapa principal
+
+        // Actualizar las tablas
+        renderTable(allReports); // Actualizar tabla principal
+        renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
     }
 }
 
-function handleDelete(reportId) {
-    allReports = allReports.filter((r) => r.id !== reportId); // Filtrar para eliminar
-    alert(`La afectación con ID: ${reportId} ha sido eliminada.`);
-    renderTable(allReports); // Volver a renderizar la tabla
+// Crear una lista para las afectaciones resueltas
+let resolvedReports = [];
+
+// Función para renderizar la tabla de resueltos
+function renderResolvedTable(reports) {
+    const resolvedTableBody = document.querySelector("#resolvedTable tbody");
+    resolvedTableBody.innerHTML = ""; // Limpiar la tabla
+
+    reports.forEach((report) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${report.id || "N/A"}</td>
+            <td>${report.report_name}</td>
+            <td>${report.email}</td>
+            <td>${report.issue_type}</td>
+            <td>${report.urgency_level}</td>
+            <td>${report.detection_date}</td>
+            <td>${report.issue_description || "No disponible"}</td>
+            <td style="display: none;">${report.location || ""}</td>
+            <td>
+                ${report.photo_evidence 
+                    ? `<a href="${report.photo_evidence}" target="_blank">
+                        <img src="${report.photo_evidence}" alt="Evidencia" style="width: 50px; height: auto;">
+                       </a>` 
+                    : "No disponible"}
+            </td>
+        `;
+        resolvedTableBody.appendChild(row);
+    });
+}
+
+
+async function handleDelete(reportId) {
+    try {
+        // Llamada a la API para eliminar el reporte en KoboToolbox
+        const response = await fetch(`${API_URL}/${reportId}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok) throw new Error(`Error al eliminar el reporte: ${response.statusText}`);
+
+        // Actualizar lista y UI
+        allReports = allReports.filter((r) => r.id !== reportId); // Remover del listado
+        alert(`La afectación con ID: ${reportId} ha sido eliminada.`);
+
+        // Actualizar el mapa y las tablas
+        renderMapMarkers(allReports); // Actualizar mapa
+        renderTable(allReports); // Actualizar tabla
+    } catch (error) {
+        console.error("Error al eliminar el reporte:", error);
+        alert("No se pudo eliminar el reporte.");
+    }
 }
 
 // Función para aplicar filtros
