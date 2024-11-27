@@ -347,40 +347,39 @@ let resolvedReports = [];
 
 // Función para manejar la resolución de un reporte
 async function handleResolve(reportId) {
-    console.log(`Intentando resolver reporte con ID: ${reportId}`);
+    const report = allReports.find((r) => r.id === reportId);
+
+    if (!report) {
+        alert('El reporte no fue encontrado.');
+        return;
+    }
 
     try {
+        // Enviar solicitud PUT para marcar como resuelto
         const response = await fetch(`/api/reports/${reportId}`, {
-            method: 'PUT', // Cambia a 'PATCH' si es necesario
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ resolved: true }), // Enviar datos adicionales si es necesario
+            body: JSON.stringify({ ...report, resolved: true }), // Enviar todos los datos, incluyendo `resolved: true`
         });
 
-        if (!response.ok) {
-            throw new Error(`Error al resolver el reporte: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-        const updatedReport = await response.json();
-        console.log('Reporte resuelto:', updatedReport);
+        alert(`El reporte con ID: ${reportId} se marcó como resuelto.`);
 
-        // Actualizar frontend
+        // Remover de la lista principal y actualizar la tabla
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
-        if (reportIndex !== -1) {
-            const report = allReports[reportIndex];
-            report.resolved = true; // Marcar como resuelto en el frontend
-            allReports.splice(reportIndex, 1); // Remover de la lista principal
-            resolvedReports.push(report); // Mover a la lista de resueltos
-            alert(`La afectación con ID: ${reportId} ha sido marcada como resuelta.`);
+        const resolvedReport = { ...allReports[reportIndex], resolved: true };
+        allReports.splice(reportIndex, 1);
+        resolvedReports.push(resolvedReport);
 
-            renderMapMarkers(allReports); // Actualizar el mapa
-            renderTable(allReports); // Actualizar tabla principal
-            renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
-        }
+        renderMapMarkers(allReports); // Actualizar los marcadores en el mapa
+        renderTable(allReports); // Actualizar tabla de reportes
+        renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
     } catch (error) {
         console.error('Error al resolver el reporte:', error);
-        alert('No se pudo resolver el reporte.');
+        alert('Hubo un error al resolver el reporte.');
     }
 }
 
