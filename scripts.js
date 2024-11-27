@@ -228,7 +228,7 @@ async function fetchReports() {
         const data = await response.json();
 
         return data.results.map(report => ({
-            id: report._id, // Asegúrate de que la API retorne este campo
+            id: report._id?.toString(), // Asegúrate de que la API retorne este campo
             report_name: report.report_name,
             email: report.email,
             location: report.location,
@@ -347,6 +347,9 @@ let resolvedReports = [];
 
 // Función para manejar la resolución de un reporte
 async function handleResolve(reportId) {
+    console.log("Intentando resolver reporte con ID:", reportId); // Depuración
+    console.log("Lista de reportes:", allReports); // Mostrar todos los reportes
+
     const report = allReports.find((r) => r.id === reportId);
 
     if (!report) {
@@ -382,6 +385,7 @@ async function handleResolve(reportId) {
         alert('Hubo un error al resolver el reporte.');
     }
 }
+
 
 // Función para renderizar la tabla de resueltos
 function renderResolvedTable(reports) {
