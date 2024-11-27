@@ -273,4 +273,29 @@ main {
     background-color: #45a049; /* Verde más oscuro */
 }
 
+.resolve-btn {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-btn {
+    background-color: #f44336; /* Rojo */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.resolve-btn:hover {
+    background-color: #45a049; /* Verde oscuro */
+}
+
+.delete-btn:hover {
+    background-color: #e53935; /* Rojo oscuro */
+}
 
