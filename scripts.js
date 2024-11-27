@@ -55,7 +55,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 // URL del formulario de KoboToolbox
-const FORM_URL = "https://kf.kobotoolbox.org/forms/YOUR_FORM_ID_HERE"; // Reemplaza con la URL de tu formulario
+const FORM_URL = "https://ee.kobotoolbox.org/z0lihxcE"; // Reemplaza con la URL de tu formulario
 
 // Agregar evento al botón para abrir el formulario
 document.getElementById("openFormButton").addEventListener("click", () => {
