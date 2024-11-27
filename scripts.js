@@ -71,24 +71,8 @@ async function fetchHeatmapDataFromKobo() {
     }
 }
 
-// Definir los límites del campus (rectángulo delimitador)
-const campusBounds = [
-    [-37.4725, -72.3465], // Esquina inferior izquierda
-    [-37.4715, -72.3440]  // Esquina superior derecha
-];
-
-// Agregar un rectángulo delimitador al mapa
-const campusRectangle = L.rectangle(campusBounds, {
-    color: "blue", // Color del borde
-    weight: 2, // Grosor de la línea
-    fillOpacity: 0.1 // Opacidad del relleno
-}).addTo(map);
-
-// Ajustar la vista del mapa para que incluya el rectángulo delimitador
-map.fitBounds(campusBounds);
-
 // Función para generar puntos dentro del rectángulo
-function generateGridPoints(bounds, gridSize, weight = 1) {
+function generateGridPoints(bounds, gridSize) {
     const [southWest, northEast] = bounds; // Coordenadas del rectángulo
     const points = [];
     const latStep = (northEast[0] - southWest[0]) / gridSize; // Paso en latitud
@@ -96,7 +80,7 @@ function generateGridPoints(bounds, gridSize, weight = 1) {
 
     for (let lat = southWest[0]; lat <= northEast[0]; lat += latStep) {
         for (let lon = southWest[1]; lon <= northEast[1]; lon += lonStep) {
-            points.push([lat, lon, weight]); // Cada punto tiene peso uniforme
+            points.push([lat, lon, 0]); // Cada punto ficticio tiene peso 0
         }
     }
 
@@ -113,10 +97,10 @@ async function updateHeatmapFromKobo() {
     }
 
     // Generar puntos ficticios en el área delimitada
-    const gridPoints = generateGridPoints(campusBounds, 50, 1); // 50x50 puntos, peso inicial 1
+    const gridPoints = generateGridPoints(campusBounds, 50); // 50x50 puntos ficticios con peso 0
 
     // Combinar puntos reales con puntos ficticios
-    const combinedHeatmapData = [...heatmapData, ...gridPoints];
+    const combinedHeatmapData = [...gridPoints, ...heatmapData]; // Los datos reales tienen prioridad
 
     if (!heatLayer) {
         heatLayer = L.heatLayer(combinedHeatmapData, {
@@ -134,23 +118,11 @@ async function updateHeatmapFromKobo() {
     }
 }
 
-// Función para alternar el mapa de calor
-function toggleHeatmap() {
-    const heatmapButton = document.getElementById("toggle-heatmap");
-
-    if (heatLayer) {
-        if (map.hasLayer(heatLayer)) {
-            map.removeLayer(heatLayer);
-            heatmapButton.textContent = "Activar Mapa de Calor";
-        } else {
-            updateHeatmapFromKobo(); // Actualizar y mostrar mapa de calor
-            heatmapButton.textContent = "Desactivar Mapa de Calor";
-        }
-    } else {
-        updateHeatmapFromKobo(); // Crear el mapa de calor si no existe
-        heatmapButton.textContent = "Desactivar Mapa de Calor";
-    }
-}
+// Delimitación del campus
+const campusBounds = [
+    [-37.473, -72.347], // Coordenadas suroeste del rectángulo
+    [-37.471, -72.343], // Coordenadas noreste del rectángulo
+];
 
 // Crear botón para alternar el mapa de calor
 const heatmapControl = L.control({ position: "bottomright" });
@@ -175,6 +147,24 @@ document.addEventListener("click", (event) => {
         toggleHeatmap();
     }
 });
+
+// Función para alternar el mapa de calor
+function toggleHeatmap() {
+    const heatmapButton = document.getElementById("toggle-heatmap");
+
+    if (heatLayer) {
+        if (map.hasLayer(heatLayer)) {
+            map.removeLayer(heatLayer);
+            heatmapButton.textContent = "Activar Mapa de Calor";
+        } else {
+            updateHeatmapFromKobo(); // Actualizar y mostrar mapa de calor
+            heatmapButton.textContent = "Desactivar Mapa de Calor";
+        }
+    } else {
+        updateHeatmapFromKobo(); // Crear el mapa de calor si no existe
+        heatmapButton.textContent = "Desactivar Mapa de Calor";
+    }
+}
 
 // Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
