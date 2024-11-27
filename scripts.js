@@ -87,7 +87,23 @@ const campusRectangle = L.rectangle(campusBounds, {
 // Ajustar la vista del mapa para que incluya el rectángulo delimitador
 map.fitBounds(campusBounds);
 
-// Actualizar la función `updateHeatmapFromKobo` para considerar los datos dentro del rectángulo
+// Función para generar puntos dentro del rectángulo
+function generateGridPoints(bounds, gridSize, weight = 1) {
+    const [southWest, northEast] = bounds; // Coordenadas del rectángulo
+    const points = [];
+    const latStep = (northEast[0] - southWest[0]) / gridSize; // Paso en latitud
+    const lonStep = (northEast[1] - southWest[1]) / gridSize; // Paso en longitud
+
+    for (let lat = southWest[0]; lat <= northEast[0]; lat += latStep) {
+        for (let lon = southWest[1]; lon <= northEast[1]; lon += lonStep) {
+            points.push([lat, lon, weight]); // Cada punto tiene peso uniforme
+        }
+    }
+
+    return points;
+}
+
+// Función para actualizar el mapa de calor en todo el rectángulo
 async function updateHeatmapFromKobo() {
     const heatmapData = await fetchHeatmapDataFromKobo();
 
@@ -96,19 +112,14 @@ async function updateHeatmapFromKobo() {
         return;
     }
 
-    // Filtrar puntos que están dentro del rectángulo delimitador
-    const filteredHeatmapData = heatmapData.filter(([lat, lon]) =>
-        lat >= campusBounds[0][0] && lat <= campusBounds[1][0] && // Verificar latitud
-        lon >= campusBounds[0][1] && lon <= campusBounds[1][1]    // Verificar longitud
-    );
+    // Generar puntos ficticios en el área delimitada
+    const gridPoints = generateGridPoints(campusBounds, 50, 1); // 50x50 puntos, peso inicial 1
 
-    if (!filteredHeatmapData.length) {
-        alert("No hay puntos dentro del área delimitada.");
-        return;
-    }
+    // Combinar puntos reales con puntos ficticios
+    const combinedHeatmapData = [...heatmapData, ...gridPoints];
 
     if (!heatLayer) {
-        heatLayer = L.heatLayer(filteredHeatmapData, {
+        heatLayer = L.heatLayer(combinedHeatmapData, {
             radius: 20,
             blur: 15,
             maxZoom: 19,
@@ -119,7 +130,7 @@ async function updateHeatmapFromKobo() {
             },
         }).addTo(map);
     } else {
-        heatLayer.setLatLngs(filteredHeatmapData); // Actualizar datos
+        heatLayer.setLatLngs(combinedHeatmapData); // Actualizar datos
     }
 }
 
