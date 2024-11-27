@@ -47,24 +47,58 @@ app.delete('/api/reports/:id', async (req, res) => {
     }
 });
 
-// Ruta para manejar la API PUT (resolver un reporte)
+// Base de datos temporal en memoria
+let database = [];
+
+// Endpoint para cargar datos desde KoboToolbox y almacenarlos en `database`
+app.get('/api', async (req, res) => {
+    try {
+        const response = await request.get(API_URL, {
+            headers: {
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+            },
+        });
+
+        database = response.data.results.map(report => ({
+            id: report._id.toString(),
+            report_name: report.report_name,
+            email: report.email,
+            location: report.location,
+            issue_type: report.issue_type,
+            urgency_level: report.urgency_level,
+            detection_date: report.detection_date,
+            issue_description: report.issue_description,
+            photo_evidence: report._attachments?.[0]?.download_medium_url || null,
+            resolved: false,
+        }));
+
+        res.status(200).send({ count: database.length, results: database });
+    } catch (error) {
+        console.error('Error al cargar datos de KoboToolbox:', error);
+        res.status(500).send('Error al procesar los datos de KoboToolbox.');
+    }
+});
+
+// Endpoint para resolver un reporte
 app.put('/api/reports/:id', (req, res) => {
-    const { id } = req.params; // Obtiene el ID del reporte
-    const updatedData = req.body; // Obtiene los datos enviados desde el cliente
+    const { id } = req.params;
 
-    console.log("ID recibido:", id); // Depuración del ID recibido
-    console.log("Datos actualizados recibidos:", updatedData); // Depuración de los datos recibidos
+    console.log('ID recibido para resolver:', id);
 
-    // Verifica si el reporte existe en la base de datos
+    // Buscar el reporte en `database`
     const reportIndex = database.findIndex(report => report.id === id);
     if (reportIndex === -1) {
-        return res.status(404).send({ error: "Reporte no encontrado" });
+        console.error('Reporte no encontrado');
+        return res.status(404).send({ error: 'Reporte no encontrado' });
     }
 
-    // Actualiza el reporte en la base de datos
-    database[reportIndex] = { ...database[reportIndex], ...updatedData };
-    res.status(200).send({ message: `Reporte con ID ${id} actualizado.` });
+    // Marcar el reporte como resuelto
+    database[reportIndex].resolved = true;
+    console.log('Reporte actualizado:', database[reportIndex]);
+
+    res.status(200).send({ message: `Reporte con ID ${id} resuelto.`, report: database[reportIndex] });
 });
+
 
 // Ruta principal para servir `Webgis.html`
 app.get('/', (req, res) => {
