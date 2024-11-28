@@ -312,13 +312,13 @@ function updateStatistics() {
     // Crear contenido dinámico con clases específicas
     statsSection.innerHTML = `
         <p class="stats-item"><strong>Total de Reportes Pendientes:</strong> ${totalPending}</p>
-        <p class="stats-item"><strong>Reportes de Urgencia Alta (Pendientes):</strong> ${highUrgencyPending}</p>
-        <p class="stats-item"><strong>Reportes de Urgencia Media (Pendientes):</strong> ${mediumUrgencyPending}</p>
-        <p class="stats-item"><strong>Reportes de Urgencia Baja (Pendientes):</strong> ${lowUrgencyPending}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Alta (Pendientes):${highUrgencyPending}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Media (Pendientes):${mediumUrgencyPending}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Baja (Pendientes): ${lowUrgencyPending}</p>
         <p class="stats-item"><strong>Total de Reportes Resueltos:</strong> ${totalResolved}</p>
-        <p class="stats-item"><strong>Reportes de Urgencia Alta (Resueltos):</strong> ${highUrgencyResolved}</p>
-        <p class="stats-item"><strong>Reportes de Urgencia Media (Resueltos):</strong> ${mediumUrgencyResolved}</p>
-        <p class="stats-item"><strong>Reportes de Urgencia Baja (Resueltos):</strong> ${lowUrgencyResolved}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Alta (Resueltos):${highUrgencyResolved}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Media (Resueltos): ${mediumUrgencyResolved}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Baja (Resueltos): ${lowUrgencyResolved}</p>
     `;
 }
 
