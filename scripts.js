@@ -476,7 +476,6 @@ function addMarker(report) {
         const marker = L.marker([coords[0], coords[1]], {
             reportId: report.id, // Asociar el marcador al ID del reporte
         }).addTo(map);
-
         marker.bindPopup(`
             <b>${report.report_name}</b><br>
             <b>Tipo:</b> ${report.issue_type}<br>
@@ -484,8 +483,7 @@ function addMarker(report) {
             <b>Urgencia:</b> ${report.urgency_level}<br>
             <button onclick="handleDelete('${report.id}')">Eliminar</button>
             <button onclick="handleResolve('${report.id}')">Resolver</button>
-        `);
-    }
+    `);
 }
 
 
