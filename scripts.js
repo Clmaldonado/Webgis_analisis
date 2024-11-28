@@ -355,6 +355,9 @@ function calculateStats(allReports, resolvedReports) {
     return stats;
 }
 
+// Crear una lista para las afectaciones resueltas
+let resolvedReports = [];
+
 function renderCharts(allReports, resolvedReports) {
     const typeData = {
         labels: ["Falla estructural", "Problema eléctrico", "Daño en áreas verdes", "Otro"],
@@ -491,9 +494,6 @@ function renderTable(reports) {
         button.addEventListener("click", (e) => handleDelete(e.target.dataset.id));
     });
 }
-
-// Crear una lista para las afectaciones resueltas
-let resolvedReports = [];
 
 // Función para manejar la resolución de reportes
 async function handleResolve(reportId) {
