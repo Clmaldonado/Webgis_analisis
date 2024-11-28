@@ -364,15 +364,15 @@ let resolvedReports = [];
 
 // Función para manejar la resolución de reportes
 async function handleResolve(reportId) {
-    try {
-        // Validar que el ID del reporte sea válido
-        if (!reportId || reportId === "undefined") {
-            console.error("Error: Report ID is undefined.");
-            alert("Hubo un error al resolver el reporte. El ID es inválido.");
-            return;
-        }
+    if (!reportId || reportId === "undefined") {
+        console.error("Error: Report ID is undefined.");
+        alert("Hubo un error al resolver el reporte. El ID es inválido.");
+        return;
+    }
 
-        console.log(`Intentando resolver reporte con ID: ${reportId}`);
+    console.log(`Intentando resolver reporte con ID: ${reportId}`);
+
+    try {
         
         // Buscar el reporte en la lista de pendientes
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
