@@ -149,37 +149,58 @@ async function fetchHeatmapDataFromKobo() {
 }
 
 // Evento para exportar la tabla a Excel
+// Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
+    if (!allReports.length && !resolvedReports.length) {
+        alert("No hay datos disponibles para exportar.");
+        return;
+    }
+
+    // Preparar datos para exportar
     const exportData = allReports.map((report) => ({
-        ID: report.id || "N/A",
-        Nombre: report.report_name,
-        Correo: report.email,
-        "Tipo de Afectación": report.issue_type,
-        Urgencia: report.urgency_level,
-        Fecha: report.detection_date,
+        ID: report._id || "N/A",
+        Nombre: report.report_name || "No disponible",
+        Correo: report.email || "No disponible",
+        "Tipo de Afectación": report.issue_type || "No disponible",
+        Urgencia: report.urgency_level || "No disponible",
+        Fecha: formatDate(report.detection_date),
         Descripción: report.issue_description || "No disponible",
         Estado: "Pendiente",
     }));
 
     const resolvedData = resolvedReports.map((report) => ({
-        ID: report.id || "N/A",
-        Nombre: report.report_name,
-        Correo: report.email,
-        "Tipo de Afectación": report.issue_type,
-        Urgencia: report.urgency_level,
-        Fecha: report.detection_date,
+        ID: report._id || "N/A",
+        Nombre: report.report_name || "No disponible",
+        Correo: report.email || "No disponible",
+        "Tipo de Afectación": report.issue_type || "No disponible",
+        Urgencia: report.urgency_level || "No disponible",
+        Fecha: formatDate(report.detection_date),
         Descripción: report.issue_description || "No disponible",
         Estado: "Resuelto",
     }));
 
+    // Crear el libro de Excel
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(exportData), "Pendientes");
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(resolvedData), "Resueltos");
+    if (exportData.length) {
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(exportData), "Pendientes");
+    }
+    if (resolvedData.length) {
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(resolvedData), "Resueltos");
+    }
 
+    // Descargar el archivo Excel
     const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0];
+    const formattedDate = today.toISOString().split("T")[0]; // Formato YYYY-MM-DD
     XLSX.writeFile(workbook, `reportes_${formattedDate}.xlsx`);
 });
+
+// Función para formatear fechas
+function formatDate(date) {
+    if (!date) return "No disponible";
+    const d = new Date(date);
+    if (isNaN(d)) return "Fecha inválida";
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 // Agregar leyenda al mapa
 const legend = L.control({ position: "bottomleft" });
