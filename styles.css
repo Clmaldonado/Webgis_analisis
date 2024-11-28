@@ -314,5 +314,11 @@ button.delete-btn:hover {
     border-radius: 10px; /* Opcional: Redondea los bordes */
     background-color: #f9f9f9; /* Opcional: Fondo claro */
 }
+#charts-section div {
+    display: flex;
+    flex-wrap: wrap; /* Permitir que los gráficos se acomoden en filas */
+    justify-content: center;
+    gap: 20px; /* Espaciado entre gráficos */
+}
 
 
