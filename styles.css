@@ -320,5 +320,11 @@ button.delete-btn:hover {
     justify-content: center;
     gap: 20px; /* Espaciado entre gráficos */
 }
+.stats-item {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #333;
+}
 
 
