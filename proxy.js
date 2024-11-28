@@ -86,8 +86,8 @@ app.get('/api', async (req, res) => {
 // Ruta para marcar reportes como resueltos
 app.post('/api/reports/:id/resolve', (req, res) => {
     console.log(`ID recibido para resolver: ${req.params.id}`);
-    const { id } = req.params;
-    const report = database.find((report) => report.id === id);
+    const { id: reportId } = req.params; // Renombra para claridad
+    const report = database.find(report => report._id === reportId); // Busca por "_id"
 
     if (!report) {
         console.log('Reporte no encontrado');
