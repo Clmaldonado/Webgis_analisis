@@ -339,56 +339,56 @@ let resolvedReports = [];
 async function handleResolve(reportId) {
     try {
         console.log(`Intentando resolver reporte con ID: ${reportId}`);
-        
-        // Enviar solicitud al servidor para marcar como resuelto
+
         const response = await fetch(`/api/reports/${reportId}/resolve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ resolved: true }),
+            body: JSON.stringify({ resolved: true }), // No es estrictamente necesario, pero lo dejamos claro
         });
 
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
 
-        // Actualizar la lista de reportes y tablas
-        const reportIndex = allReports.findIndex((r) => r._id === reportId);
+        const data = await response.json();
+        console.log("Reporte resuelto con éxito:", data);
+
+        // Mueve el reporte a la tabla de resueltos
+        const reportIndex = allReports.findIndex(r => r._id === reportId);
         if (reportIndex !== -1) {
-            const resolvedReport = allReports.splice(reportIndex, 1)[0]; // Remover el reporte resuelto
-            resolvedReports.push(resolvedReport); // Agregarlo a la lista de resueltos
+            const resolvedReport = allReports[reportIndex];
+            resolvedReport.resolved = true; // Marca el reporte como resuelto
+            allReports.splice(reportIndex, 1); // Elimina de la tabla principal
+            resolvedReports.push(resolvedReport); // Agrega a la tabla de resueltos
 
-            // Actualizar las tablas y el mapa
-            renderTable(allReports);
-            renderResolvedTable(resolvedReports);
-            renderMapMarkers(allReports);
+            // Actualiza la interfaz
+            renderMapMarkers(allReports); // Quita el marcador del mapa
+            renderTable(allReports); // Actualiza la tabla de reportes pendientes
+            renderResolvedTable(resolvedReports); // Actualiza la tabla de resueltos
         }
-
-        alert(`Reporte con ID ${reportId} marcado como resuelto.`);
     } catch (error) {
         console.error("Error al resolver el reporte:", error);
         alert("Hubo un error al resolver el reporte.");
     }
 }
 
-
 // Función para renderizar la tabla de resueltos
 function renderResolvedTable(reports) {
     const resolvedTableBody = document.querySelector("#resolvedTable tbody");
-    resolvedTableBody.innerHTML = ""; // Limpiar la tabla
+    resolvedTableBody.innerHTML = ""; // Limpia la tabla
 
-    reports.forEach((report) => {
+    reports.forEach(report => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${report.id || "N/A"}</td>
+            <td>${report._id}</td>
             <td>${report.report_name}</td>
             <td>${report.email}</td>
             <td>${report.issue_type}</td>
             <td>${report.urgency_level}</td>
             <td>${report.detection_date}</td>
             <td>${report.issue_description || "No disponible"}</td>
-            <td style="display: none;">${report.location || ""}</td>
             <td>
                 ${report.photo_evidence 
                     ? `<a href="${report.photo_evidence}" target="_blank">
