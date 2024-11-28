@@ -1,6 +1,6 @@
 const express = require('express');
-const cors = require('cors'); // Importar CORS
-const request = require('axios'); // Usando Axios en lugar de Request
+const axios = require('axios'); // Aquí asegúrate de usar 'axios' en lugar de 'request'
+const cors = require('cors'); // Habilitar CORS
 const path = require('path');
 
 const app = express();
@@ -21,7 +21,7 @@ app.get('/api', async (req, res) => {
     try {
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa la variable de entorno para el token
             },
         });
         res.status(response.status).send(response.data);
