@@ -358,6 +358,22 @@ function calculateStats(allReports, resolvedReports) {
 // Crear una lista para las afectaciones resueltas
 let resolvedReports = [];
 
+function createChart(chartId, type, data) {
+    const ctx = document.getElementById(chartId).getContext("2d");
+    new Chart(ctx, {
+        type: type,
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: "top",
+                },
+            },
+        },
+    });
+}
+
 function renderCharts(allReports, resolvedReports) {
     const typeData = {
         labels: ["Falla estructural", "Problema eléctrico", "Daño en áreas verdes", "Otro"],
