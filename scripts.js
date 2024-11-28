@@ -236,32 +236,39 @@ async function fetchReports() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
         const data = await response.json();
 
-        return data.results.map(report => ({
-            id: report._id?.toString(), // Asegúrate de que la API retorne este campo
-            report_name: report.report_name,
-            email: report.email,
-            location: report.location,
+        // Verifica qué datos devuelve la API
+        console.log("Datos obtenidos de la API:", data.results);
+
+        return data.results.map((report) => ({
+            id: report._id?.toString() || "N/A", // Convierte `_id` a string o asigna "N/A" si está ausente
+            report_name: report.report_name || "Nombre no disponible", // Valor por defecto
+            email: report.email || "Correo no disponible",
+            location: report.location || "Ubicación no especificada",
             // Traducción de tipos de problema
             issue_type: report.issue_type === "structural" ? "Falla estructural" :
                         report.issue_type === "electrical" ? "Problema eléctrico" :
                         report.issue_type === "landscaping" ? "Daño en áreas verdes" :
                         report.issue_type === "other" ? "Otro" :
-                        report.issue_type, // Si no coincide, dejar el valor original
+                        "Tipo no especificado", // Valor por defecto si no coincide
             // Traducción de urgencia
             urgency_level: report.urgency_level === "low" ? "Bajo" :
                            report.urgency_level === "medium" ? "Medio" :
-                           "Alto", // Si no coincide, se considera "Alto" por defecto
-            detection_date: report.detection_date,
-            issue_description: report.issue_description,
-            photo_evidence: report._attachments?.[0]?.download_medium_url || null,
+                           report.urgency_level === "high" ? "Alto" :
+                           "Urgencia no especificada", // Valor por defecto si no coincide
+            detection_date: report.detection_date || "Fecha no disponible",
+            issue_description: report.issue_description || "Descripción no disponible",
+            photo_evidence: report._attachments?.[0]?.download_medium_url || null, // Nulo si no hay evidencia
         }));
     } catch (error) {
         console.error("Error al cargar los datos:", error);
+        alert("Hubo un problema al cargar los reportes. Por favor, inténtelo más tarde.");
         return [];
     }
 }
+
 
 // Función para calcular estadísticas
 function calculateStatistics(reports) {
