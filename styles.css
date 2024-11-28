@@ -306,5 +306,13 @@ button.delete-btn:hover {
     background-color: #d32f2f; /* Rojo oscuro al pasar el mouse */
     opacity: 0.9;
 }
+.chart {
+    max-width: 400px; /* Reduce el ancho máximo */
+    max-height: 300px; /* Reduce el alto máximo */
+    margin: 20px auto; /* Centra los gráficos */
+    border: 1px solid #ddd; /* Opcional: Agrega un borde */
+    border-radius: 10px; /* Opcional: Redondea los bordes */
+    background-color: #f9f9f9; /* Opcional: Fondo claro */
+}
 
 
