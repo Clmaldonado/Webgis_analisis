@@ -358,9 +358,18 @@ function calculateStats(allReports, resolvedReports) {
 // Crear una lista para las afectaciones resueltas
 let resolvedReports = [];
 
+const chartInstances = {}; // Objeto para almacenar las instancias de los gráficos
+
 function createChart(chartId, type, data) {
     const ctx = document.getElementById(chartId).getContext("2d");
-    new Chart(ctx, {
+
+    // Si ya existe un gráfico en este canvas, destruirlo
+    if (chartInstances[chartId]) {
+        chartInstances[chartId].destroy();
+    }
+
+    // Crear y almacenar el nuevo gráfico
+    chartInstances[chartId] = new Chart(ctx, {
         type: type,
         data: data,
         options: {
@@ -373,6 +382,7 @@ function createChart(chartId, type, data) {
         },
     });
 }
+
 
 function renderCharts(allReports, resolvedReports) {
     const typeData = {
