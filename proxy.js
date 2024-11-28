@@ -88,7 +88,8 @@ app.post('/api/reports/:id/resolve', (req, res) => {
     console.log(`ID recibido para resolver: ${req.params.id}`);
     const { id: reportId } = req.params; // Renombra para claridad
     const report = database.find(report => report._id === reportId); // Busca por "_id"
-
+    console.log("ID recibido para resolver:", id);
+    
     if (!report) {
         console.log('Reporte no encontrado');
         return res.status(404).send({ error: 'Reporte no encontrado' });
