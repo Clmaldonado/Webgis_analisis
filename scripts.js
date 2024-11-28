@@ -293,6 +293,28 @@ function displayStatistics(statistics) {
     `;
 }
 
+function updateStatistics() {
+    // Contar reportes pendientes
+    const totalPending = allReports.length;
+    const highUrgencyPending = allReports.filter((r) => r.urgency_level === "Alto").length;
+    const mediumUrgencyPending = allReports.filter((r) => r.urgency_level === "Medio").length;
+    const lowUrgencyPending = allReports.filter((r) => r.urgency_level === "Bajo").length;
+
+    // Contar reportes resueltos
+    const totalResolved = resolvedReports.length;
+
+    // Actualizar el HTML de las estadísticas
+    const statsSection = document.getElementById("statistics");
+    statsSection.innerHTML = `
+        <p><strong>Total de Reportes Pendientes:</strong> ${totalPending}</p>
+        <p><strong>Reportes de Urgencia Alta (Pendientes):</strong> ${highUrgencyPending}</p>
+        <p><strong>Reportes de Urgencia Media (Pendientes):</strong> ${mediumUrgencyPending}</p>
+        <p><strong>Reportes de Urgencia Baja (Pendientes):</strong> ${lowUrgencyPending}</p>
+        <p><strong>Total de Reportes Resueltos:</strong> ${totalResolved}</p>
+    `;
+}
+
+
 // Función para renderizar marcadores en el mapa
 function renderMapMarkers(reports) {
     map.eachLayer(layer => {
@@ -393,6 +415,7 @@ async function handleResolve(reportId) {
         renderMapMarkers(allReports); // Actualizar marcadores
         renderTable(allReports); // Actualizar tabla de pendientes
         renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
+        updateStatistics(); // Llamar para actualizar las estadísticas
 
         alert(`Reporte con ID ${reportId} marcado como resuelto.`);
     } catch (error) {
