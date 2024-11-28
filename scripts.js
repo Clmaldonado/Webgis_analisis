@@ -302,6 +302,9 @@ function updateStatistics() {
 
     // Contar reportes resueltos
     const totalResolved = resolvedReports.length;
+    const highUrgencyResolved = resolvedReports.filter((r) => r.urgency_level === "Alto").length;
+    const mediumUrgencyResolved = resolvedReports.filter((r) => r.urgency_level === "Medio").length;
+    const lowUrgencyResolved = resolvedReports.filter((r) => r.urgency_level === "Bajo").length;
 
     // Actualizar el HTML de las estadísticas
     const statsSection = document.getElementById("statistics");
@@ -311,8 +314,12 @@ function updateStatistics() {
         <p><strong>Reportes de Urgencia Media (Pendientes):</strong> ${mediumUrgencyPending}</p>
         <p><strong>Reportes de Urgencia Baja (Pendientes):</strong> ${lowUrgencyPending}</p>
         <p><strong>Total de Reportes Resueltos:</strong> ${totalResolved}</p>
+        <p><strong>Reportes de Urgencia Alta (Resueltos):</strong> ${highUrgencyResolved}</p>
+        <p><strong>Reportes de Urgencia Media (Resueltos):</strong> ${mediumUrgencyResolved}</p>
+        <p><strong>Reportes de Urgencia Baja (Resueltos):</strong> ${lowUrgencyResolved}</p>
     `;
 }
+
  // Graficos
 function calculateStats(allReports, resolvedReports) {
     const stats = {
@@ -347,6 +354,75 @@ function calculateStats(allReports, resolvedReports) {
 
     return stats;
 }
+
+function renderCharts(allReports, resolvedReports) {
+    const typeData = {
+        labels: ["Falla estructural", "Problema eléctrico", "Daño en áreas verdes", "Otro"],
+        datasets: [
+            {
+                label: "Pendientes",
+                data: [
+                    allReports.filter(r => r.issue_type === "Falla estructural").length,
+                    allReports.filter(r => r.issue_type === "Problema eléctrico").length,
+                    allReports.filter(r => r.issue_type === "Daño en áreas verdes").length,
+                    allReports.filter(r => r.issue_type === "Otro").length,
+                ],
+                backgroundColor: "rgba(255, 99, 132, 0.5)",
+            },
+            {
+                label: "Resueltos",
+                data: [
+                    resolvedReports.filter(r => r.issue_type === "Falla estructural").length,
+                    resolvedReports.filter(r => r.issue_type === "Problema eléctrico").length,
+                    resolvedReports.filter(r => r.issue_type === "Daño en áreas verdes").length,
+                    resolvedReports.filter(r => r.issue_type === "Otro").length,
+                ],
+                backgroundColor: "rgba(54, 162, 235, 0.5)",
+            },
+        ],
+    };
+
+    const urgencyData = {
+        labels: ["Alta", "Media", "Baja"],
+        datasets: [
+            {
+                label: "Pendientes",
+                data: [
+                    allReports.filter(r => r.urgency_level === "Alto").length,
+                    allReports.filter(r => r.urgency_level === "Medio").length,
+                    allReports.filter(r => r.urgency_level === "Bajo").length,
+                ],
+                backgroundColor: ["red", "orange", "yellow"],
+            },
+            {
+                label: "Resueltos",
+                data: [
+                    resolvedReports.filter(r => r.urgency_level === "Alto").length,
+                    resolvedReports.filter(r => r.urgency_level === "Medio").length,
+                    resolvedReports.filter(r => r.urgency_level === "Bajo").length,
+                ],
+                backgroundColor: ["darkred", "darkorange", "darkyellow"],
+            },
+        ],
+    };
+
+    // Gráfico de tipos de afectación
+    const ctxType = document.getElementById("typeChart").getContext("2d");
+    new Chart(ctxType, {
+        type: "bar",
+        data: typeData,
+    });
+
+    // Gráfico de urgencias
+    const ctxUrgency = document.getElementById("urgencyChart").getContext("2d");
+    new Chart(ctxUrgency, {
+        type: "pie",
+        data: urgencyData,
+    });
+}
+
+// Llama a renderCharts después de actualizar estadísticas
+renderCharts(allReports, resolvedReports);
 
 
 // Función para renderizar marcadores en el mapa
