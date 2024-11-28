@@ -359,40 +359,6 @@ function renderTable(reports) {
     });
 }
 
-// Función para manejar la resolución de reportes
-async function handleResolve(reportId) {
-    if (!reportId || reportId === "undefined") {
-        console.error("Error: Report ID is undefined.");
-        alert("Hubo un error al resolver el reporte. El ID es inválido.");
-        return;
-        }
-        console.log(`Intentando resolver reporte con ID: ${reportId}`);
-            
-        // Simular que el reporte se marca como resuelto sin eliminarlo de la base de datos de KoboToolbox
-        const reportIndex = allReports.findIndex((r) => r.id === reportId);
-        if (reportIndex === -1) {
-            throw new Error("Reporte no encontrado en la lista de pendientes.");
-        }
-
-        const report = allReports[reportIndex];
-        report.resolved = true; // Marcar como resuelto
-
-        // Mover el reporte a la lista de resueltos
-        allReports.splice(reportIndex, 1); // Remover de la lista de pendientes
-        resolvedReports.push(report); // Agregar a la lista de resueltos
-
-        // Actualizar la interfaz
-        renderMapMarkers(allReports); // Actualizar marcadores
-        renderTable(allReports); // Actualizar tabla de pendientes
-        renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
-
-        alert(`Reporte con ID ${reportId} marcado como resuelto.`);
-    } catch (error) {
-        console.error("Error al resolver el reporte:", error);
-        alert("Hubo un error al resolver el reporte.");
-    }
-}
-
 // Crear una lista para las afectaciones resueltas
 let resolvedReports = [];
 
