@@ -313,6 +313,40 @@ function updateStatistics() {
         <p><strong>Total de Reportes Resueltos:</strong> ${totalResolved}</p>
     `;
 }
+ // Graficos
+function calculateStats(allReports, resolvedReports) {
+    const stats = {
+        totalReports: allReports.length + resolvedReports.length,
+        totalPending: allReports.length,
+        totalResolved: resolvedReports.length,
+        byType: {
+            pending: {},
+            resolved: {},
+        },
+        byUrgency: {
+            pending: { high: 0, medium: 0, low: 0 },
+            resolved: { high: 0, medium: 0, low: 0 },
+        },
+    };
+
+    allReports.forEach(report => {
+        const type = report.issue_type || "Otro";
+        const urgency = report.urgency_level.toLowerCase();
+
+        stats.byType.pending[type] = (stats.byType.pending[type] || 0) + 1;
+        stats.byUrgency.pending[urgency]++;
+    });
+
+    resolvedReports.forEach(report => {
+        const type = report.issue_type || "Otro";
+        const urgency = report.urgency_level.toLowerCase();
+
+        stats.byType.resolved[type] = (stats.byType.resolved[type] || 0) + 1;
+        stats.byUrgency.resolved[urgency]++;
+    });
+
+    return stats;
+}
 
 
 // Función para renderizar marcadores en el mapa
