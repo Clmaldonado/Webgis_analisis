@@ -355,6 +355,9 @@ function calculateStats(allReports, resolvedReports) {
     return stats;
 }
 
+let allReports = []; // Lista de reportes pendientes
+let resolvedReports = []; // Lista de reportes resueltos
+
 function renderCharts(allReports, resolvedReports) {
     const typeData = {
         labels: ["Falla estructural", "Problema eléctrico", "Daño en áreas verdes", "Otro"],
@@ -420,6 +423,7 @@ function renderCharts(allReports, resolvedReports) {
         data: urgencyData,
     });
 }
+
 
 // Llama a renderCharts después de actualizar estadísticas
 renderCharts(allReports, resolvedReports);
