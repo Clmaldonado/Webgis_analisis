@@ -396,32 +396,45 @@ async function handleResolve(reportId) {
 // Crear una lista para las afectaciones resueltas
 let resolvedReports = [];
 
-// Función para renderizar la tabla de resueltos
-function renderResolvedTable(reports) {
-    const resolvedTableBody = document.querySelector("#resolvedTable tbody");
-    resolvedTableBody.innerHTML = ""; // Limpiar la tabla
+// Función para manejar la resolución de reportes
+async function handleResolve(reportId) {
+    try {
+        // Validar que el ID del reporte sea válido
+        if (!reportId || reportId === "undefined") {
+            console.error("Error: Report ID is undefined.");
+            alert("Hubo un error al resolver el reporte. El ID es inválido.");
+            return;
+        }
 
-    reports.forEach(report => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${report._id}</td>
-            <td>${report.report_name}</td>
-            <td>${report.email}</td>
-            <td>${report.issue_type}</td>
-            <td>${report.urgency_level}</td>
-            <td>${report.detection_date}</td>
-            <td>${report.issue_description || "No disponible"}</td>
-            <td>
-                ${report.photo_evidence 
-                    ? `<a href="${report.photo_evidence}" target="_blank">
-                        <img src="${report.photo_evidence}" alt="Evidencia" style="width: 50px; height: auto;">
-                       </a>` 
-                    : "No disponible"}
-            </td>
-        `;
-        resolvedTableBody.appendChild(row);
-    });
+        console.log(`Intentando resolver reporte con ID: ${reportId}`);
+        
+        // Buscar el reporte en la lista de pendientes
+        const reportIndex = allReports.findIndex((r) => r.id === reportId);
+        if (reportIndex === -1) {
+            throw new Error("Reporte no encontrado en la lista de pendientes.");
+        }
+
+        // Obtener el reporte y marcarlo como resuelto
+        const report = allReports[reportIndex];
+        report.resolved = true; // Marcar como resuelto
+
+        // Mover el reporte a la lista de resueltos
+        allReports.splice(reportIndex, 1); // Remover de la lista de pendientes
+        resolvedReports.push(report); // Agregar a la lista de resueltos
+
+        // Actualizar la interfaz
+        renderMapMarkers(allReports); // Actualizar marcadores
+        renderTable(allReports); // Actualizar tabla de pendientes
+        renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
+
+        alert(`Reporte con ID ${reportId} marcado como resuelto.`);
+    } catch (error) {
+        // Manejo de errores
+        console.error("Error al resolver el reporte:", error);
+        alert("Hubo un error al resolver el reporte.");
+    }
 }
+
 
 // Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
