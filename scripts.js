@@ -364,9 +364,9 @@ let resolvedReports = [];
 
 // Función para manejar la resolución de reportes
 async function handleResolve(reportId) {
+    console.log(`ID recibido en handleResolve: ${reportId}`);
     if (!reportId || reportId === "undefined") {
-        console.error("Error: Report ID is undefined.");
-        alert("Hubo un error al resolver el reporte. El ID es inválido.");
+        console.warn("Warning: Report ID is undefined. Verifica los datos de los botones o el HTML.");
         return;
     }
 
@@ -377,7 +377,8 @@ async function handleResolve(reportId) {
         // Buscar el reporte en la lista de pendientes
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
         if (reportIndex === -1) {
-            throw new Error("Reporte no encontrado en la lista de pendientes.");
+            console.error(`Reporte con ID ${reportId} no encontrado en la lista de pendientes.`);
+            return;
         }
 
         // Obtener el reporte y marcarlo como resuelto
