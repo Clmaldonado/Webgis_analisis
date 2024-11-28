@@ -401,6 +401,31 @@ async function handleResolve(reportId) {
     }
 }
 
+// Función para renderizar la tabla de reportes resueltos
+function renderResolvedTable(reports) {
+    const resolvedTableBody = document.querySelector("#resolvedTable tbody"); // Seleccionar el cuerpo de la tabla
+    resolvedTableBody.innerHTML = ""; // Limpiar contenido previo de la tabla
+
+    reports.forEach((report) => {
+        const row = document.createElement("tr"); // Crear una fila para cada reporte resuelto
+        row.innerHTML = `
+            <td>${report.id || "N/A"}</td>
+            <td>${report.report_name}</td>
+            <td>${report.email}</td>
+            <td>${report.issue_type}</td>
+            <td>${report.urgency_level}</td>
+            <td>${report.detection_date}</td>
+            <td>${report.issue_description || "No disponible"}</td>
+            <td>
+                ${report.photo_evidence 
+                    ? `<a href="${report.photo_evidence}" target="_blank">Ver Evidencia</a>` 
+                    : "No disponible"}
+            </td>
+        `;
+        resolvedTableBody.appendChild(row); // Agregar la fila a la tabla
+    });
+}
+
 
 // Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
