@@ -273,32 +273,6 @@ main {
     background-color: #45a049; /* Verde más oscuro */
 }
 
-.resolve-btn {
-    background-color: #4CAF50; /* Verde */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.delete-btn {
-    background-color: #f44336; /* Rojo */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.resolve-btn:hover {
-    background-color: #45a049; /* Verde oscuro */
-}
-
-.delete-btn:hover {
-    background-color: #e53935; /* Rojo oscuro */
-}
-
 #resolvedTable {
     width: 100%;
     border-collapse: collapse;
@@ -323,4 +297,36 @@ main {
 #resolvedTable tr:hover {
     background-color: #f1f1f1;
 }
+/* Botón verde para Resolver */
+button.resolve-btn {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.resolve-btn:hover {
+    background-color: #45a049; /* Verde oscuro al pasar el mouse */
+    opacity: 0.9;
+}
+
+/* Ajustes para los botones Eliminar (rojo) */
+button.delete-btn {
+    background-color: #f44336; /* Rojo */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.delete-btn:hover {
+    background-color: #d32f2f; /* Rojo oscuro al pasar el mouse */
+    opacity: 0.9;
+}
+
 
