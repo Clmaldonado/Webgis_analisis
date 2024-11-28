@@ -483,7 +483,8 @@ function addMarker(report) {
             <b>Urgencia:</b> ${report.urgency_level}<br>
             <button onclick="handleDelete('${report.id}')">Eliminar</button>
             <button onclick="handleResolve('${report.id}')">Resolver</button>
-    `);
+      `);
+   }
 }
 
 
