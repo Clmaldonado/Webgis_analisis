@@ -39,8 +39,6 @@ map.on("drag", function () {
 // Aplicar límites máximos al mapa
 map.setMaxBounds(expandedBounds);
 
-// Aplicar un "rebote" al mapa si el usuario intenta alejarse demasiado
-map.setMaxBounds(L.latLngBounds(bounds1.getSouthWest(), bounds2.getNorthEast()));
 // Agregar la capa del mapa base
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
