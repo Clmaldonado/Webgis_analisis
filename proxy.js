@@ -85,18 +85,21 @@ app.get('/api', async (req, res) => {
 
 // Ruta para marcar reportes como resueltos
 app.post('/api/reports/:id/resolve', (req, res) => {
+    console.log(`ID recibido para resolver: ${req.params.id}`);
     const { id } = req.params;
-    const report = database.find((report) => report.id === id); // Ajusta esto según tu lógica de base de datos
+    const report = database.find((report) => report.id === id);
 
     if (!report) {
+        console.log('Reporte no encontrado');
         return res.status(404).send({ error: 'Reporte no encontrado' });
     }
 
-    // Marcar el reporte como resuelto
     report.resolved = true;
 
+    console.log(`Reporte con ID ${id} resuelto.`);
     res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.`, report });
 });
+
 
 
 // Ruta principal para servir `Webgis.html`
