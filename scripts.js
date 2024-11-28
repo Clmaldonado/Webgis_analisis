@@ -355,8 +355,6 @@ function calculateStats(allReports, resolvedReports) {
     return stats;
 }
 
-let resolvedReports = []; // Lista de reportes resueltos
-
 function renderCharts(allReports, resolvedReports) {
     const typeData = {
         labels: ["Falla estructural", "Problema eléctrico", "Daño en áreas verdes", "Otro"],
