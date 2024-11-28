@@ -83,24 +83,19 @@ app.get('/api', async (req, res) => {
     }
 });
 
-// Endpoint para resolver un reporte
-app.put('/api/reports/:id', (req, res) => {
+// Ruta para marcar reportes como resueltos
+app.post('/api/reports/:id/resolve', (req, res) => {
     const { id } = req.params;
+    const report = database.find((report) => report.id === id); // Ajusta esto según tu lógica de base de datos
 
-    console.log('ID recibido para resolver:', id);
-
-    // Buscar el reporte en `database`
-    const reportIndex = database.findIndex(report => report.id === id);
-    if (reportIndex === -1) {
-        console.error('Reporte no encontrado');
+    if (!report) {
         return res.status(404).send({ error: 'Reporte no encontrado' });
     }
 
     // Marcar el reporte como resuelto
-    database[reportIndex].resolved = true;
-    console.log('Reporte actualizado:', database[reportIndex]);
+    report.resolved = true;
 
-    res.status(200).send({ message: `Reporte con ID ${id} resuelto.`, report: database[reportIndex] });
+    res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.`, report });
 });
 
 
