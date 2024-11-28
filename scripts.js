@@ -149,7 +149,6 @@ async function fetchHeatmapDataFromKobo() {
 }
 
 // Evento para exportar la tabla a Excel
-// Evento para exportar la tabla a Excel
 document.getElementById("exportExcel").addEventListener("click", function () {
     if (!allReports.length && !resolvedReports.length) {
         alert("No hay datos disponibles para exportar.");
@@ -242,8 +241,8 @@ async function fetchReports() {
         // Verifica qué datos devuelve la API
         console.log("Datos obtenidos de la API:", data.results);
 
-        return data.results.map((report) => ({
-            id: report._id ? report._id.toString() : "N/A", // Convertir _id a string si está presente
+        return data.results.map(report => ({
+            id: report._id?.toString()// Convertir _id a string si está presente
             report_name: report.report_name || "Nombre no disponible", // Valor por defecto
             email: report.email || "Correo no disponible",
             location: report.location || "Ubicación no especificada",
@@ -362,9 +361,13 @@ function renderTable(reports) {
 
 // Función para manejar la resolución de reportes
 async function handleResolve(reportId) {
-    try {
+    if (!reportId || reportId === "undefined") {
+        console.error("Error: Report ID is undefined.");
+        alert("Hubo un error al resolver el reporte. El ID es inválido.");
+        return;
+        }
         console.log(`Intentando resolver reporte con ID: ${reportId}`);
-        
+            
         // Simular que el reporte se marca como resuelto sin eliminarlo de la base de datos de KoboToolbox
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
         if (reportIndex === -1) {
