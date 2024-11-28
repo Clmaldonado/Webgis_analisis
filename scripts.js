@@ -156,24 +156,24 @@ document.getElementById("exportExcel").addEventListener("click", function () {
     }
 
     // Preparar datos para exportar
-    const exportData = allReports.map((report) => ({
-        ID: report._id || "N/A",
-        Nombre: report.report_name || "No disponible",
-        Correo: report.email || "No disponible",
-        "Tipo de Afectación": report.issue_type || "No disponible",
-        Urgencia: report.urgency_level || "No disponible",
-        Fecha: formatDate(report.detection_date),
+       const exportData = allReports.map((report) => ({
+        ID: report.id || "N/A",
+        Nombre: report.report_name,
+        Correo: report.email,
+        "Tipo de Afectación": report.issue_type,
+        Urgencia: report.urgency_level,
+        Fecha: report.detection_date,
         Descripción: report.issue_description || "No disponible",
         Estado: "Pendiente",
     }));
-
+    
     const resolvedData = resolvedReports.map((report) => ({
-        ID: report._id || "N/A",
-        Nombre: report.report_name || "No disponible",
-        Correo: report.email || "No disponible",
-        "Tipo de Afectación": report.issue_type || "No disponible",
-        Urgencia: report.urgency_level || "No disponible",
-        Fecha: formatDate(report.detection_date),
+        ID: report.id || "N/A",
+        Nombre: report.report_name,
+        Correo: report.email,
+        "Tipo de Afectación": report.issue_type,
+        Urgencia: report.urgency_level,
+        Fecha: report.detection_date,
         Descripción: report.issue_description || "No disponible",
         Estado: "Resuelto",
     }));
@@ -242,7 +242,7 @@ async function fetchReports() {
         console.log("Datos obtenidos de la API:", data.results);
 
         return data.results.map(report => ({
-            id: report._id?.toString(),// Convertir _id a string si está presente
+            id: report._id?.toString() || "N/A", // Convertir _id a string si está presente
             report_name: report.report_name || "Nombre no disponible", // Valor por defecto
             email: report.email || "Correo no disponible",
             location: report.location || "Ubicación no especificada",
@@ -403,11 +403,11 @@ async function handleResolve(reportId) {
 
 // Función para renderizar la tabla de reportes resueltos
 function renderResolvedTable(reports) {
-    const resolvedTableBody = document.querySelector("#resolvedTable tbody"); // Seleccionar el cuerpo de la tabla
-    resolvedTableBody.innerHTML = ""; // Limpiar contenido previo de la tabla
+    const resolvedTableBody = document.querySelector("#resolvedTable tbody");
+    resolvedTableBody.innerHTML = ""; // Limpiar la tabla antes de llenarla
 
     reports.forEach((report) => {
-        const row = document.createElement("tr"); // Crear una fila para cada reporte resuelto
+        const row = document.createElement("tr");
         row.innerHTML = `
             <td>${report.id || "N/A"}</td>
             <td>${report.report_name}</td>
@@ -416,16 +416,15 @@ function renderResolvedTable(reports) {
             <td>${report.urgency_level}</td>
             <td>${report.detection_date}</td>
             <td>${report.issue_description || "No disponible"}</td>
-            <td>
-                ${report.photo_evidence 
-                    ? `<a href="${report.photo_evidence}" target="_blank">Ver Evidencia</a>` 
-                    : "No disponible"}
+            <td>${report.photo_evidence 
+                ? `<a href="${report.photo_evidence}" target="_blank">Ver evidencia</a>` 
+                : "No disponible"}
             </td>
         `;
-        resolvedTableBody.appendChild(row); // Agregar la fila a la tabla
+        resolvedTableBody.appendChild(row);
     });
+    console.log("Tabla de resueltos actualizada.");
 }
-
 
 // Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
