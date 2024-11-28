@@ -306,17 +306,19 @@ function updateStatistics() {
     const mediumUrgencyResolved = resolvedReports.filter((r) => r.urgency_level === "Medio").length;
     const lowUrgencyResolved = resolvedReports.filter((r) => r.urgency_level === "Bajo").length;
 
-    // Actualizar el HTML de las estadísticas
+    // Obtener contenedores de estadísticas
     const statsSection = document.getElementById("statistics");
+
+    // Crear contenido dinámico con clases específicas
     statsSection.innerHTML = `
-        <p><strong>Total de Reportes Pendientes:</strong> ${totalPending}</p>
-        <p><strong>Reportes de Urgencia Alta (Pendientes):</strong> ${highUrgencyPending}</p>
-        <p><strong>Reportes de Urgencia Media (Pendientes):</strong> ${mediumUrgencyPending}</p>
-        <p><strong>Reportes de Urgencia Baja (Pendientes):</strong> ${lowUrgencyPending}</p>
-        <p><strong>Total de Reportes Resueltos:</strong> ${totalResolved}</p>
-        <p><strong>Reportes de Urgencia Alta (Resueltos):</strong> ${highUrgencyResolved}</p>
-        <p><strong>Reportes de Urgencia Media (Resueltos):</strong> ${mediumUrgencyResolved}</p>
-        <p><strong>Reportes de Urgencia Baja (Resueltos):</strong> ${lowUrgencyResolved}</p>
+        <p class="stats-item"><strong>Total de Reportes Pendientes:</strong> ${totalPending}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Alta (Pendientes):</strong> ${highUrgencyPending}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Media (Pendientes):</strong> ${mediumUrgencyPending}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Baja (Pendientes):</strong> ${lowUrgencyPending}</p>
+        <p class="stats-item"><strong>Total de Reportes Resueltos:</strong> ${totalResolved}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Alta (Resueltos):</strong> ${highUrgencyResolved}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Media (Resueltos):</strong> ${mediumUrgencyResolved}</p>
+        <p class="stats-item"><strong>Reportes de Urgencia Baja (Resueltos):</strong> ${lowUrgencyResolved}</p>
     `;
 }
 
