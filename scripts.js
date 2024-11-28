@@ -341,12 +341,12 @@ async function handleResolve(reportId) {
 
     try {
         // Realizar la solicitud POST al servidor para marcar el reporte como resuelto
-        const response = await fetch(`/api/reports/${reportId}/resolve`, {
+        const response = await fetch(`/api/reports/${report._id}/resolve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ resolved: true }), // Enviar el estado resuelto
+            body: JSON.stringify({ resolved: true }),
         });
 
         if (!response.ok) {
