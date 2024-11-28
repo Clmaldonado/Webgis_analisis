@@ -83,25 +83,27 @@ app.get('/api', async (req, res) => {
     }
 });
 
-// Ruta para marcar reportes como resueltos
+let resolvedReports = []; // Lista de reportes resueltos (almacenada en memoria por ahora)
+
+// Ruta para manejar la acción de resolver un reporte
 app.post('/api/reports/:id/resolve', (req, res) => {
-    console.log(`ID recibido para resolver: ${req.params.id}`);
-    const { id: reportId } = req.params; // Renombra para claridad
-    const report = database.find(report => report._id === reportId); // Busca por "_id"
-    console.log("ID recibido para resolver:", id);
-    
+    const { id } = req.params;
+
+    // Busca el reporte en la base de datos simulada de KoboToolbox
+    const report = database.find(r => r._id === id); // Ajusta `_id` según tus datos reales
     if (!report) {
-        console.log('Reporte no encontrado');
         return res.status(404).send({ error: 'Reporte no encontrado' });
     }
 
+    // Marca el reporte como resuelto
     report.resolved = true;
 
-    console.log(`Reporte con ID ${id} resuelto.`);
-    res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.`, report });
+    // Mueve el reporte a la lista de reportes resueltos
+    resolvedReports.push(report);
+
+    // Responde con éxito
+    res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.` });
 });
-
-
 
 // Ruta principal para servir `Webgis.html`
 app.get('/', (req, res) => {
