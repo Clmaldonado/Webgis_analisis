@@ -404,24 +404,14 @@ function renderCharts(allReports, resolvedReports) {
                     resolvedReports.filter(r => r.urgency_level === "Medio").length,
                     resolvedReports.filter(r => r.urgency_level === "Bajo").length,
                 ],
-                backgroundColor: ["darkred", "darkorange", "darkyellow"],
+                backgroundColor: ["darkred", "darkorange", "gold"],
             },
         ],
     };
 
-    // Gráfico de tipos de afectación
-    const ctxType = document.getElementById("typeChart").getContext("2d");
-    new Chart(ctxType, {
-        type: "bar",
-        data: typeData,
-    });
-
-    // Gráfico de urgencias
-    const ctxUrgency = document.getElementById("urgencyChart").getContext("2d");
-    new Chart(ctxUrgency, {
-        type: "pie",
-        data: urgencyData,
-    });
+    // Crear los gráficos
+    createChart("typeChart", "bar", typeData);
+    createChart("urgencyChart", "pie", urgencyData);
 }
 
 
@@ -526,6 +516,7 @@ async function handleResolve(reportId) {
         renderMapMarkers(allReports); // Actualizar marcadores
         renderTable(allReports); // Actualizar tabla de pendientes
         renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
+        renderCharts(allReports, resolvedReports); // Actualizar los gráfico
         updateStatistics(); // Llamar para actualizar las estadísticas
 
         alert(`Reporte con ID ${reportId} marcado como resuelto.`);
@@ -658,6 +649,9 @@ function applyFilters() {
 async function displayReports() {
     allReports = await fetchReports(); // Cargar todos los reportes
 
+    // Renderizar todo después de que los datos estén cargados
+    renderCharts(allReports, resolvedReports);
+    
     // Mostrar todo inicialmente
     const statistics = calculateStatistics(allReports);
     displayStatistics(statistics);
