@@ -355,7 +355,6 @@ function calculateStats(allReports, resolvedReports) {
     return stats;
 }
 
-let allReports = []; // Lista de reportes pendientes
 let resolvedReports = []; // Lista de reportes resueltos
 
 function renderCharts(allReports, resolvedReports) {
