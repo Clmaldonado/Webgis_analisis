@@ -353,52 +353,43 @@ function renderTable(reports) {
     });
 }
 
-// Crear una lista para las afectaciones resueltas
-let resolvedReports = [];
-
-// Función para manejar la resolución de un reporte
+// Función para manejar la resolución de reportes
 async function handleResolve(reportId) {
     try {
         console.log(`Intentando resolver reporte con ID: ${reportId}`);
-
-        const response = await fetch(`/api/reports/${reportId}/resolve`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ resolved: true }), // No es estrictamente necesario, pero lo dejamos claro
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
+        
+        // Simular que el reporte se marca como resuelto sin eliminarlo de la base de datos de KoboToolbox
+        const reportIndex = allReports.findIndex((r) => r.id === reportId);
+        if (reportIndex === -1) {
+            throw new Error("Reporte no encontrado en la lista de pendientes.");
         }
 
-        const data = await response.json();
-        console.log("Reporte resuelto con éxito:", data);
+        const report = allReports[reportIndex];
+        report.resolved = true; // Marcar como resuelto
 
-        // Mueve el reporte a la tabla de resueltos
-        const reportIndex = allReports.findIndex(r => r._id === reportId);
-        if (reportIndex !== -1) {
-            const resolvedReport = allReports[reportIndex];
-            resolvedReport.resolved = true; // Marca el reporte como resuelto
-            allReports.splice(reportIndex, 1); // Elimina de la tabla principal
-            resolvedReports.push(resolvedReport); // Agrega a la tabla de resueltos
+        // Mover el reporte a la lista de resueltos
+        allReports.splice(reportIndex, 1); // Remover de la lista de pendientes
+        resolvedReports.push(report); // Agregar a la lista de resueltos
 
-            // Actualiza la interfaz
-            renderMapMarkers(allReports); // Quita el marcador del mapa
-            renderTable(allReports); // Actualiza la tabla de reportes pendientes
-            renderResolvedTable(resolvedReports); // Actualiza la tabla de resueltos
-        }
+        // Actualizar la interfaz
+        renderMapMarkers(allReports); // Actualizar marcadores
+        renderTable(allReports); // Actualizar tabla de pendientes
+        renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
+
+        alert(`Reporte con ID ${reportId} marcado como resuelto.`);
     } catch (error) {
         console.error("Error al resolver el reporte:", error);
         alert("Hubo un error al resolver el reporte.");
     }
 }
 
+// Crear una lista para las afectaciones resueltas
+let resolvedReports = [];
+
 // Función para renderizar la tabla de resueltos
 function renderResolvedTable(reports) {
     const resolvedTableBody = document.querySelector("#resolvedTable tbody");
-    resolvedTableBody.innerHTML = ""; // Limpia la tabla
+    resolvedTableBody.innerHTML = ""; // Limpiar la tabla
 
     reports.forEach(report => {
         const row = document.createElement("tr");
@@ -485,9 +476,11 @@ function addMarker(report) {
             <b>Descripción:</b> ${report.issue_description}<br>
             <b>Urgencia:</b> ${report.urgency_level}<br>
             <button onclick="handleDelete('${report.id}')">Eliminar</button>
+            <button onclick="handleResolve('${report.id}')">Resolver</button>
         `);
     }
 }
+
 
 // Función para aplicar filtros
 function applyFilters() {
