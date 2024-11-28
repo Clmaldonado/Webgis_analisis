@@ -21,31 +21,23 @@ const map = L.map("map", {
 });
 
 // Definir los dos límites rectangulares
-const bounds1 = L.latLngBounds(
-    [-37.47151989522344, -72.34652807849588], // Esquina suroeste
-    [-37.47106606471147, -72.34403480482447]  // Esquina noreste
+const expandedBounds = L.latLngBounds(
+    [-37.473, -72.347], // Esquina suroeste extendida
+    [-37.470, -72.343]  // Esquina noreste extendida
 );
 
-const bounds2 = L.latLngBounds(
-    [-37.4727640749241, -72.34611450561441], // Esquina suroeste
-    [-37.47222547556444, -72.34365802101807]  // Esquina noreste
-);
-
-// Función para verificar si un punto está dentro de los límites permitidos
-function isInsideBounds(latlng) {
-    return bounds1.contains(latlng) || bounds2.contains(latlng);
-}
-
-// Evento para limitar el movimiento del mapa
+// Evento para limitar el movimiento del mapa dentro de los límites ampliados
 map.on("drag", function () {
     const center = map.getCenter(); // Obtener el centro actual del mapa
 
-    if (!isInsideBounds(center)) {
-        // Si el centro está fuera de los límites permitidos, devuélvelo al área más cercana
-        const nearestBounds = bounds1.contains(center) ? bounds1 : bounds2;
-        map.panInsideBounds(nearestBounds, { animate: true });
+    if (!expandedBounds.contains(center)) {
+        // Si el centro está fuera de los límites permitidos, reubicarlo dentro
+        map.panInsideBounds(expandedBounds, { animate: true });
     }
 });
+
+// Aplicar límites máximos al mapa
+map.setMaxBounds(expandedBounds);
 
 // Aplicar un "rebote" al mapa si el usuario intenta alejarse demasiado
 map.setMaxBounds(L.latLngBounds(bounds1.getSouthWest(), bounds2.getNorthEast()));
