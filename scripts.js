@@ -243,7 +243,7 @@ async function fetchReports() {
         console.log("Datos obtenidos de la API:", data.results);
 
         return data.results.map((report) => ({
-            id: report._id?.toString() || "N/A", // Convierte `_id` a string o asigna "N/A" si está ausente
+            id: report._id ? report._id.toString() : "N/A", // Convertir _id a string si está presente
             report_name: report.report_name || "Nombre no disponible", // Valor por defecto
             email: report.email || "Correo no disponible",
             location: report.location || "Ubicación no especificada",
