@@ -161,7 +161,8 @@ main {
 }
 
 /* Tabla */
-#table-section {
+/* Contenedor de las tablas */
+#table-section, #resolved-section {
     background: #fff;
     padding: 1.5rem;
     border-radius: 10px;
@@ -169,15 +170,15 @@ main {
 }
 
 /* Tablas responsivas */
-#reportTable {
+#reportTable, #resolvedTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
     table-layout: auto; /* Ajuste automático del ancho */
 }
 
-#reportTable th,
-#reportTable td {
+#reportTable th, #reportTable td,
+#resolvedTable th, #resolvedTable td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;
@@ -187,25 +188,25 @@ main {
 
 /* Estilo responsivo: mejor visualización en dispositivos móviles */
 @media screen and (max-width: 768px) {
-    #reportTable th {
+    #reportTable th, #resolvedTable th {
         background-color: #f1f1f1; /* Resaltar encabezados */
         font-size: 0.9rem;
     }
 
-    #reportTable td {
+    #reportTable td, #resolvedTable td {
         font-size: 0.85rem;
         word-wrap: break-word; /* Ajustar contenido largo */
     }
 
-    #reportTable {
+    #reportTable, #resolvedTable {
         display: block;
         overflow-x: auto; /* Habilitar desplazamiento horizontal */
         white-space: nowrap; /* Evitar que el contenido se desborde */
     }
 
     /* Aumentar legibilidad */
-    #reportTable td,
-    #reportTable th {
+    #reportTable td, #reportTable th,
+    #resolvedTable td, #resolvedTable th {
         padding: 8px;
     }
 }
@@ -273,30 +274,7 @@ main {
     background-color: #45a049; /* Verde más oscuro */
 }
 
-#resolvedTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
 
-#resolvedTable th, #resolvedTable td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-#resolvedTable th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-}
-
-#resolvedTable tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-#resolvedTable tr:hover {
-    background-color: #f1f1f1;
-}
 /* Botón verde para Resolver */
 button.resolve-btn {
     background-color: #4CAF50; /* Verde */
