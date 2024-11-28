@@ -343,7 +343,7 @@ function renderTable(reports) {
                     : "No disponible"}
             </td>
             <td>
-                <<button onclick="handleResolve('${report._id}')">Resolver</button>
+                <<button onclick="handleResolve('${report.id}')">Resolver</button>
                 <button class="delete-btn" data-id="${report.id}">Eliminar</button>
             </td>
         `;
