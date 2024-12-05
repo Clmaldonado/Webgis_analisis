@@ -674,20 +674,41 @@ function applyFilters() {
 }
 
 // Función principal para cargar datos y mostrar todo
+// Función principal para cargar datos y mostrar todo
 async function displayReports() {
-    allReports = await fetchReports(); // Cargar todos los reportes
+    try {
+        // Cargar reportes pendientes desde la API
+        const pendingResponse = await fetch(`${API_URL}/reports/pending`);
+        if (pendingResponse.ok) {
+            allReports = await pendingResponse.json();
+        } else {
+            console.error("Error al cargar reportes pendientes:", pendingResponse.statusText);
+            allReports = [];
+        }
 
-    // Renderizar todo después de que los datos estén cargados
-    renderCharts(allReports, resolvedReports);
-    
-    // Mostrar todo inicialmente
-    const statistics = calculateStatistics(allReports);
-    displayStatistics(statistics);
-    renderMapMarkers(allReports);
-    renderTable(allReports);
+        // Cargar reportes resueltos desde la API
+        const resolvedResponse = await fetch(`${API_URL}/reports/resolved`);
+        if (resolvedResponse.ok) {
+            resolvedReports = await resolvedResponse.json();
+        } else {
+            console.error("Error al cargar reportes resueltos:", resolvedResponse.statusText);
+            resolvedReports = [];
+        }
 
-    // Agregar evento al botón de filtros
-    document.querySelector("#apply-filters").addEventListener("click", applyFilters);
+        // Renderizar datos después de cargarlos
+        renderCharts(allReports, resolvedReports); // Actualizar gráficos
+        renderMapMarkers(allReports); // Mostrar marcadores solo de pendientes en el mapa
+        renderTable(allReports); // Tabla de reportes pendientes
+        renderResolvedTable(resolvedReports); // Tabla de reportes resueltos
+        updateStatistics(); // Actualizar estadísticas generales
+
+        // Agregar evento al botón de filtros
+        document.querySelector("#apply-filters").addEventListener("click", applyFilters);
+
+    } catch (error) {
+        console.error("Error al cargar reportes:", error);
+        alert("No se pudieron cargar los reportes. Intente más tarde.");
+    }
 }
 
 // Ejecutar al cargar la página
