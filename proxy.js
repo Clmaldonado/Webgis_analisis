@@ -29,14 +29,16 @@ async function createTable() {
     const query = `
         CREATE TABLE IF NOT EXISTS reports (
             id SERIAL PRIMARY KEY,
-            report_name VARCHAR(255) NOT NULL,
-            email VARCHAR(255),
-            location VARCHAR(255),
-            issue_type VARCHAR(100),
-            urgency_level VARCHAR(50),
-            detection_date DATE,
-            issue_description TEXT,
+            reporter_name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            location_description VARCHAR(255),
+            gps_location VARCHAR(255),
+            issue_type VARCHAR(100) NOT NULL,
+            issue_description TEXT NOT NULL,
+            urgency_level VARCHAR(50) NOT NULL,
+            detection_date DATE NOT NULL,
             photo_evidence TEXT,
+            additional_notes TEXT,
             resolved BOOLEAN DEFAULT FALSE
         );
     `;
