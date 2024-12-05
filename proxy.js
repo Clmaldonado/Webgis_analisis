@@ -4,11 +4,16 @@ const cors = require('cors');
 const path = require('path');
 const { Pool } = require('pg'); // Importar el cliente de PostgreSQL
 
-// Configuración de la base de datos PostgreSQL con DATABASE_URL
+// Configurar conexión al pool de PostgreSQL
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }, // Necesario para conexiones seguras en Render
+    ssl: { rejectUnauthorized: false }, // SSL necesario en Render
 });
+
+// Ejemplo de prueba para verificar conexión
+pool.connect()
+    .then(() => console.log('Conexión exitosa a PostgreSQL'))
+    .catch(err => console.error('Error de conexión a PostgreSQL:', err));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
