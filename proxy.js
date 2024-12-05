@@ -91,15 +91,25 @@ app.post('/api/reports', async (req, res) => {
 });
 
 // Ruta para obtener todos los reportes de la base de datos
-app.get('/api/reports', async (req, res) => {
+app.get('/api/reports/pending', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM reports');
+        const result = await pool.query('SELECT * FROM reports WHERE resolved = FALSE');
         res.status(200).send(result.rows);
     } catch (error) {
-        console.error('Error al obtener reportes:', error);
-        res.status(500).send('Error al obtener los reportes.');
+        console.error('Error al obtener reportes pendientes:', error);
+        res.status(500).send('Error al obtener reportes pendientes.');
     }
 });
+app.get('/api/reports/resolved', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM reports WHERE resolved = TRUE');
+        res.status(200).send(result.rows);
+    } catch (error) {
+        console.error('Error al obtener reportes resueltos:', error);
+        res.status(500).send('Error al obtener reportes resueltos.');
+    }
+});
+
 
 // Ruta para eliminar un reporte por ID
 app.delete('/api/reports/:id', async (req, res) => {
