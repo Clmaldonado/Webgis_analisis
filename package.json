@@ -11,8 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
     "axios": "^1.7.8",
-    "express": "^4.21.1"
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pg": "^8.13.1",
+    "setprototypeof": "^1.2.0"
   }
 }
