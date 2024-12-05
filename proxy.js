@@ -4,20 +4,17 @@ const cors = require('cors');
 const path = require('path');
 const { Pool } = require('pg'); // Importar el cliente de PostgreSQL
 
-// Configuración de la base de datos PostgreSQL
+// Configuración de la base de datos PostgreSQL con DATABASE_URL
 const pool = new Pool({
-    user: process.env.DB_USER || 'tu_usuario',
-    host: process.env.DB_HOST || 'localhost',
-    database: process.env.DB_NAME || 'webgis',
-    password: process.env.DB_PASSWORD || 'tu_contraseña',
-    port: process.env.DB_PORT || 5432,
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }, // Necesario para conexiones seguras en Render
 });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
 
-// Middleware para habilitar CORS y JSON
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
