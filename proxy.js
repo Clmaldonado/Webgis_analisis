@@ -1,119 +1,103 @@
 const express = require('express');
-const axios = require('axios'); // Aquí asegúrate de usar 'axios' en lugar de 'request'
-const cors = require('cors'); // Habilitar CORS
+const axios = require('axios'); // Usar Axios para solicitudes HTTP
+const cors = require('cors'); // Middleware para habilitar CORS
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
 
-// Middleware para habilitar CORS
-app.use(cors()); // Permitir todas las solicitudes de todos los orígenes
-
-// Middleware para manejar JSON
+// Middleware para habilitar CORS y JSON
+app.use(cors());
 app.use(express.json());
-
-// Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname)));
 
 // Servir archivos estáticos desde la carpeta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ruta para manejar la API GET (obtener datos)
+// Base de datos temporal en memoria
+let database = [];
+let resolvedReports = [];
+
+// Ruta para cargar datos desde KoboToolbox y almacenarlos en memoria
 app.get('/api', async (req, res) => {
     try {
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa la variable de entorno para el token
-            },
-        });
-        res.status(response.status).send(response.data);
-    } catch (error) {
-        console.error('Error al realizar la solicitud a la API:', error);
-        res.status(500).send('Error al procesar los datos de la API.');
-    }
-});
-
-// Ruta para manejar la API DELETE (eliminar un reporte por ID)
-app.delete('/api/reports/:id', async (req, res) => {
-    const reportId = req.params.id;
-
-    try {
-        const response = await axios.delete(`${API_URL}${reportId}/`, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Token API de KoboToolbox
             },
         });
 
-        res.status(response.status).send({ message: `Reporte con ID ${reportId} eliminado.` });
-    } catch (error) {
-        console.error(`Error al eliminar el reporte con ID ${reportId}:`, error.response?.data || error.message);
-        res.status(error.response?.status || 500).send({
-            error: `Error al eliminar el reporte con ID ${reportId}.`,
-        });
-    }
-});
-
-// Base de datos temporal en memoria
-let database = [];
-
-// Endpoint para cargar datos desde KoboToolbox y almacenarlos en `database`
-app.get('/api', async (req, res) => {
-    try {
-        const response = await request.get(API_URL, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
-            },
-        });
-
+        // Procesar y guardar en la base de datos temporal
         database = response.data.results.map(report => ({
             id: report._id.toString(),
-            report_name: report.report_name,
-            email: report.email,
-            location: report.location,
-            issue_type: report.issue_type,
-            urgency_level: report.urgency_level,
-            detection_date: report.detection_date,
-            issue_description: report.issue_description,
+            report_name: report.report_name || "Sin nombre",
+            email: report.email || "Sin correo",
+            location: report.location || "Sin ubicación",
+            issue_type: report.issue_type || "No especificado",
+            urgency_level: report.urgency_level || "No especificado",
+            detection_date: report.detection_date || "Sin fecha",
+            issue_description: report.issue_description || "No disponible",
             photo_evidence: report._attachments?.[0]?.download_medium_url || null,
-            resolved: false,
+            resolved: false, // Inicialmente sin resolver
         }));
 
-        res.status(200).send({ count: database.length, results: database });
+        res.status(200).json({ count: database.length, results: database });
     } catch (error) {
-        console.error('Error al cargar datos de KoboToolbox:', error);
-        res.status(500).send('Error al procesar los datos de KoboToolbox.');
+        console.error('Error al cargar datos desde KoboToolbox:', error.message);
+        res.status(500).send('Error al cargar datos desde KoboToolbox.');
     }
 });
 
-let resolvedReports = []; // Lista de reportes resueltos (almacenada en memoria por ahora)
-
-// Ruta para manejar la acción de resolver un reporte
+// Ruta para marcar un reporte como resuelto
 app.post('/api/reports/:id/resolve', (req, res) => {
     const { id } = req.params;
 
-    // Busca el reporte en la base de datos simulada de KoboToolbox
-    const report = database.find(r => r._id === id); // Ajusta `_id` según tus datos reales
-    if (!report) {
-        return res.status(404).send({ error: 'Reporte no encontrado' });
+    // Buscar el reporte en la base de datos temporal
+    const reportIndex = database.findIndex(r => r.id === id);
+    if (reportIndex === -1) {
+        return res.status(404).json({ error: 'Reporte no encontrado' });
     }
 
-    // Marca el reporte como resuelto
+    // Marcar como resuelto
+    const report = database.splice(reportIndex, 1)[0];
     report.resolved = true;
-
-    // Mueve el reporte a la lista de reportes resueltos
     resolvedReports.push(report);
 
-    // Responde con éxito
-    res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.` });
+    res.status(200).json({ message: `Reporte con ID ${id} marcado como resuelto.`, report });
+});
+
+// Ruta para obtener los reportes resueltos
+app.get('/api/reports/resolved', (req, res) => {
+    res.status(200).json({ count: resolvedReports.length, results: resolvedReports });
+});
+
+// Ruta para eliminar un reporte
+app.delete('/api/reports/:id', (req, res) => {
+    const { id } = req.params;
+
+    // Buscar en la base de datos temporal
+    const dbIndex = database.findIndex(r => r.id === id);
+    const resolvedIndex = resolvedReports.findIndex(r => r.id === id);
+
+    if (dbIndex !== -1) {
+        database.splice(dbIndex, 1);
+        return res.status(200).json({ message: `Reporte con ID ${id} eliminado.` });
+    }
+
+    if (resolvedIndex !== -1) {
+        resolvedReports.splice(resolvedIndex, 1);
+        return res.status(200).json({ message: `Reporte con ID ${id} eliminado de la lista de resueltos.` });
+    }
+
+    res.status(404).json({ error: 'Reporte no encontrado.' });
 });
 
 // Ruta principal para servir `Webgis.html`
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Webgis.html'));
+    res.sendFile(path.join(__dirname, 'public', 'Webgis.html'));
 });
 
-// Inicia el servidor
+// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
