@@ -536,7 +536,21 @@ function addMarkersToLayer(reports) {
 
     markerLayer.addTo(map); // Agregar la capa de grupo al mapa
 }
+// Función para obtener opciones del marcador según la urgencia
+function getMarkerOptions(urgencyLevel) {
+    const color = urgencyLevel === "Alto" ? "red" :
+                  urgencyLevel === "Medio" ? "orange" :
+                  urgencyLevel === "Bajo" ? "yellow" : "gray"; // Color por defecto para niveles no especificados
 
+    return {
+        icon: L.divIcon({
+            className: "custom-marker",
+            html: `<div style="background-color:${color}; width: 25px; height: 25px; border-radius: 50%; border: 2px solid white;"></div>`,
+            iconSize: [25, 25],
+            iconAnchor: [12, 12]
+        }),
+    };
+}
 // Función para alternar visibilidad de los marcadores
 function toggleMarkers() {
     if (map.hasLayer(markerLayer)) {
