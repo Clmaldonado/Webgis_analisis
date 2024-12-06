@@ -44,6 +44,41 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 20, // Zoom máximo soportado por la capa base
 }).addTo(map);
 
+
+// Cargar y agregar el archivo GeoJSON al mapa
+async function loadGeoJSON() {
+    const geojsonUrl = '/data/CAMPUS.geojson'; // Ajusta la ruta si es necesario
+
+    try {
+        const response = await fetch(geojsonUrl);
+        if (!response.ok) throw new Error(`Error al cargar el archivo GeoJSON: ${response.statusText}`);
+
+        const data = await response.json();
+
+        // Agregar GeoJSON al mapa con estilo y popups
+        L.geoJSON(data, {
+            style: function (feature) {
+                return { color: "blue", weight: 2 }; // Estilo predeterminado
+            },
+            onEachFeature: function (feature, layer) {
+                // Vincula un popup a cada característica, si tiene propiedades
+                if (feature.properties && feature.properties.name) {
+                    layer.bindPopup(`<b>${feature.properties.name}</b>`);
+                }
+            }
+        }).addTo(map);
+
+        console.log("GeoJSON agregado al mapa.");
+    } catch (error) {
+        console.error("Error al cargar el GeoJSON:", error);
+    }
+}
+
+// Llamar a la función para cargar el GeoJSON después de inicializar el mapa
+loadGeoJSON();
+
+
+
 // URL del formulario de KoboToolbox
 const FORM_URL = "https://ee.kobotoolbox.org/z0lihxcE"; // Reemplaza con la URL de tu formulario
 
