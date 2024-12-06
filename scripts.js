@@ -614,7 +614,7 @@ async function handleResolve(reportId) {
         resolvedReports.push(report); // Agregar a la lista de resueltos
 
         // Actualizar la interfaz
-        renderMapMarkers(allReports); // Actualizar marcadores
+        addMarkersToLayer(allReports); // Actualizar marcadores
         renderTable(allReports); // Actualizar tabla de pendientes
         renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
         renderCharts(allReports, resolvedReports); // Actualizar los gráfico
@@ -747,7 +747,7 @@ function applyFilters() {
     // Renderizar resultados filtrados
     const statistics = calculateStatistics(filteredReports);
     displayStatistics(statistics);
-    renderMapMarkers(filteredReports);
+    addMarkersToLayer(filteredReports);
     renderTable(filteredReports);
 }
 
