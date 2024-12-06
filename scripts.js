@@ -231,44 +231,42 @@ function getMarkerOptions(urgencyLevel) {
 }
 
 // Función para cargar reportes desde la API
-// Función para cargar reportes desde la API
 async function fetchReports() {
     try {
-        // Hacer la solicitud a la API
-        const response = await fetch(`${API_URL}/reports/pending`);
+        const response = await fetch(API_URL);
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-        // Obtener los datos en formato JSON
         const data = await response.json();
 
-        // Verificar la estructura de los datos recibidos
-        console.log("Datos obtenidos de la API:", data);
+        // Verifica qué datos devuelve la API
+        console.log("Datos obtenidos de la API:", data.results);
 
-        // Mapear los datos según la estructura de tu base de datos y frontend
-        return data.map(report => ({
-            id: report.id || "N/A", // Convertir id a string si está presente
-            reporter_name: report.reporter_name || "Nombre no disponible", // Campo para el nombre del reportante
-            email: report.email || "Correo no disponible", // Email
-            gps_location: report.gps_location || "Sin coordenadas", // Coordenadas GPS
-            location_description: report.location_description || "Sin descripción", // Descripción de la ubicación
-            issue_type: report.issue_type || "No especificado", // Tipo de problema
-            urgency_level: report.urgency_level || "No especificado", // Urgencia
-            detection_date: report.detection_date || "Sin fecha", // Fecha
-            issue_description: report.issue_description || "Sin descripción", // Descripción del problema
-            photo_evidence: report.photo_evidence || null, // Evidencia fotográfica
-            resolved: report.resolved || false, // Estado del reporte
+        return data.results.map(report => ({
+            id: report._id?.toString() || "N/A", // Convertir _id a string si está presente
+            report_name: report.report_name || "Nombre no disponible", // Valor por defecto
+            email: report.email || "Correo no disponible",
+            location: report.location || "Ubicación no especificada",
+            // Traducción de tipos de problema
+            issue_type: report.issue_type === "structural" ? "Falla estructural" :
+                        report.issue_type === "electrical" ? "Problema eléctrico" :
+                        report.issue_type === "landscaping" ? "Daño en áreas verdes" :
+                        report.issue_type === "other" ? "Otro" :
+                        "Tipo no especificado", // Valor por defecto si no coincide
+            // Traducción de urgencia
+            urgency_level: report.urgency_level === "low" ? "Bajo" :
+                           report.urgency_level === "medium" ? "Medio" :
+                           report.urgency_level === "high" ? "Alto" :
+                           "Urgencia no especificada", // Valor por defecto si no coincide
+            detection_date: report.detection_date || "Fecha no disponible",
+            issue_description: report.issue_description || "Descripción no disponible",
+            photo_evidence: report._attachments?.[0]?.download_medium_url || null, // Nulo si no hay evidencia
         }));
     } catch (error) {
-        // Manejo de errores
         console.error("Error al cargar los datos:", error);
-
-        // Mostrar mensaje en la interfaz de usuario si ocurre un error
-        document.getElementById("error-message").textContent = 
-            "No se pudieron cargar los reportes. Por favor, intente más tarde.";
+        alert("Hubo un problema al cargar los reportes. Por favor, inténtelo más tarde.");
         return [];
     }
 }
-
 
 
 // Función para calcular estadísticas
@@ -483,14 +481,13 @@ function renderTable(reports) {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${report.id || "N/A"}</td>
-            <td>${report.report_name || "No especificado"}</td>
-            <td>${report.email || "No especificado"}</td>
-            <td>${report.location || "Sin coordenadas"}</td>
-            <td>${report.location_desc || "Sin descripción"}</td>
-            <td>${report.issue_type || "No especificado"}</td>
-            <td>${report.issue_description || "Sin descripción"}</td>
-            <td>${report.urgency_level || "No especificado"}</td>
-            <td>${report.detection_date || "Sin fecha"}</td>
+            <td>${report.report_name}</td>
+            <td>${report.email}</td>
+            <td>${report.issue_type}</td>
+            <td>${report.urgency_level}</td>
+            <td>${report.detection_date}</td>
+            <td>${report.issue_description || "No disponible"}</td>
+            <td style="display: none;">${report.location || ""}</td> <!-- Columna oculta para ubicación -->
             <td>
                 ${report.photo_evidence 
                     ? `<a href="${report.photo_evidence}" target="_blank">
@@ -527,19 +524,7 @@ async function handleResolve(reportId) {
     console.log(`Intentando resolver reporte con ID: ${reportId}`);
 
     try {
-        // Solicitud al servidor para actualizar el estado del reporte
-        const response = await fetch(`${API_URL}/reports/${reportId}/resolve`, {
-            method: 'POST', // La ruta en el backend debería aceptar un POST
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error al marcar como resuelto: ${response.statusText}`);
-        }
-
-        // Actualización local tras la confirmación del servidor
+        
         // Buscar el reporte en la lista de pendientes
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
         if (reportIndex === -1) {
@@ -559,14 +544,14 @@ async function handleResolve(reportId) {
         renderMapMarkers(allReports); // Actualizar marcadores
         renderTable(allReports); // Actualizar tabla de pendientes
         renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
-        renderCharts(allReports, resolvedReports); // Actualizar los gráficos
+        renderCharts(allReports, resolvedReports); // Actualizar los gráfico
         updateStatistics(); // Llamar para actualizar las estadísticas
 
         alert(`Reporte con ID ${reportId} marcado como resuelto.`);
     } catch (error) {
         // Manejo de errores
         console.error("Error al resolver el reporte:", error);
-        alert("Hubo un error al resolver el reporte. Por favor, intente de nuevo.");
+        alert("Hubo un error al resolver el reporte.");
     }
 }
 
@@ -579,20 +564,15 @@ function renderResolvedTable(reports) {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${report.id || "N/A"}</td>
-            <td>${report.report_name || "No especificado"}</td>
-            <td>${report.email || "No especificado"}</td>
-            <td>${report.location || "Sin coordenadas"}</td>
-            <td>${report.location_desc || "Sin descripción"}</td>
-            <td>${report.issue_type || "No especificado"}</td>
-            <td>${report.issue_description || "Sin descripción"}</td>
-            <td>${report.urgency_level || "No especificado"}</td>
-            <td>${report.detection_date || "Sin fecha"}</td>
-            <td>
-                ${report.photo_evidence 
-                    ? `<a href="${report.photo_evidence}" target="_blank">
-                        <img src="${report.photo_evidence}" alt="Evidencia" style="width: 50px; height: auto;">
-                       </a>` 
-                    : "No disponible"}
+            <td>${report.report_name}</td>
+            <td>${report.email}</td>
+            <td>${report.issue_type}</td>
+            <td>${report.urgency_level}</td>
+            <td>${report.detection_date}</td>
+            <td>${report.issue_description || "No disponible"}</td>
+            <td>${report.photo_evidence 
+                ? `<a href="${report.photo_evidence}" target="_blank">Ver evidencia</a>` 
+                : "No disponible"}
             </td>
         `;
         resolvedTableBody.appendChild(row);
@@ -694,41 +674,20 @@ function applyFilters() {
 }
 
 // Función principal para cargar datos y mostrar todo
-// Función principal para cargar datos y mostrar todo
 async function displayReports() {
-    try {
-        // Cargar reportes pendientes desde la API
-        const pendingResponse = await fetch(`${API_URL}/reports/pending`);
-        if (pendingResponse.ok) {
-            allReports = await pendingResponse.json();
-        } else {
-            console.error("Error al cargar reportes pendientes:", pendingResponse.statusText);
-            allReports = [];
-        }
+    allReports = await fetchReports(); // Cargar todos los reportes
 
-        // Cargar reportes resueltos desde la API
-        const resolvedResponse = await fetch(`${API_URL}/reports/resolved`);
-        if (resolvedResponse.ok) {
-            resolvedReports = await resolvedResponse.json();
-        } else {
-            console.error("Error al cargar reportes resueltos:", resolvedResponse.statusText);
-            resolvedReports = [];
-        }
+    // Renderizar todo después de que los datos estén cargados
+    renderCharts(allReports, resolvedReports);
+    
+    // Mostrar todo inicialmente
+    const statistics = calculateStatistics(allReports);
+    displayStatistics(statistics);
+    renderMapMarkers(allReports);
+    renderTable(allReports);
 
-        // Renderizar datos después de cargarlos
-        renderCharts(allReports, resolvedReports); // Actualizar gráficos
-        renderMapMarkers(allReports); // Mostrar marcadores solo de pendientes en el mapa
-        renderTable(allReports); // Tabla de reportes pendientes
-        renderResolvedTable(resolvedReports); // Tabla de reportes resueltos
-        updateStatistics(); // Actualizar estadísticas generales
-
-        // Agregar evento al botón de filtros
-        document.querySelector("#apply-filters").addEventListener("click", applyFilters);
-
-    } catch (error) {
-        console.error("Error al cargar reportes:", error);
-        alert("No se pudieron cargar los reportes. Intente más tarde.");
-    }
+    // Agregar evento al botón de filtros
+    document.querySelector("#apply-filters").addEventListener("click", applyFilters);
 }
 
 // Ejecutar al cargar la página
