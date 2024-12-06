@@ -525,7 +525,19 @@ async function handleResolve(reportId) {
     console.log(`Intentando resolver reporte con ID: ${reportId}`);
 
     try {
-        
+        // Solicitud al servidor para actualizar el estado del reporte
+        const response = await fetch(`${API_URL}/reports/${reportId}/resolve`, {
+            method: 'POST', // La ruta en el backend debería aceptar un POST
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al marcar como resuelto: ${response.statusText}`);
+        }
+
+        // Actualización local tras la confirmación del servidor
         // Buscar el reporte en la lista de pendientes
         const reportIndex = allReports.findIndex((r) => r.id === reportId);
         if (reportIndex === -1) {
@@ -545,14 +557,14 @@ async function handleResolve(reportId) {
         renderMapMarkers(allReports); // Actualizar marcadores
         renderTable(allReports); // Actualizar tabla de pendientes
         renderResolvedTable(resolvedReports); // Actualizar tabla de resueltos
-        renderCharts(allReports, resolvedReports); // Actualizar los gráfico
+        renderCharts(allReports, resolvedReports); // Actualizar los gráficos
         updateStatistics(); // Llamar para actualizar las estadísticas
 
         alert(`Reporte con ID ${reportId} marcado como resuelto.`);
     } catch (error) {
         // Manejo de errores
         console.error("Error al resolver el reporte:", error);
-        alert("Hubo un error al resolver el reporte.");
+        alert("Hubo un error al resolver el reporte. Por favor, intente de nuevo.");
     }
 }
 
