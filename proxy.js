@@ -1,119 +1,134 @@
-const express = require('express');
-const axios = require('axios'); // Aquí asegúrate de usar 'axios' en lugar de 'request'
-const cors = require('cors'); // Habilitar CORS
-const path = require('path');
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
+const { Pool } = require("pg");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
 
-// Middleware para habilitar CORS
-app.use(cors()); // Permitir todas las solicitudes de todos los orígenes
+// Configurar conexión a PostgreSQL
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL, // Configurada en Render o localmente
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false, // Requerido por Render
+});
 
-// Middleware para manejar JSON
+// Middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname)));
+// Crear tabla al iniciar el servidor si no existe
+async function createTable() {
+    const query = `
+        CREATE TABLE IF NOT EXISTS reports (
+            id SERIAL PRIMARY KEY,
+            kobo_id VARCHAR(255) UNIQUE,
+            report_name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            location VARCHAR(255),
+            issue_type VARCHAR(100) NOT NULL,
+            urgency_level VARCHAR(50) NOT NULL,
+            detection_date DATE NOT NULL,
+            issue_description TEXT NOT NULL,
+            photo_evidence TEXT,
+            resolved BOOLEAN DEFAULT FALSE
+        );
+    `;
+    try {
+        await pool.query(query);
+        console.log("Tabla reports creada o ya existe.");
+    } catch (error) {
+        console.error("Error al crear la tabla:", error);
+    }
+}
 
-// Servir archivos estáticos desde la carpeta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Ruta para manejar la API GET (obtener datos)
-app.get('/api', async (req, res) => {
+// Ruta para obtener datos de KoboToolbox y almacenarlos en la base de datos
+app.get("/api/sync", async (req, res) => {
+    const API_URL = "https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/";
     try {
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa la variable de entorno para el token
-            },
-        });
-        res.status(response.status).send(response.data);
-    } catch (error) {
-        console.error('Error al realizar la solicitud a la API:', error);
-        res.status(500).send('Error al procesar los datos de la API.');
-    }
-});
-
-// Ruta para manejar la API DELETE (eliminar un reporte por ID)
-app.delete('/api/reports/:id', async (req, res) => {
-    const reportId = req.params.id;
-
-    try {
-        const response = await axios.delete(`${API_URL}${reportId}/`, {
-            headers: {
                 Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
 
-        res.status(response.status).send({ message: `Reporte con ID ${reportId} eliminado.` });
-    } catch (error) {
-        console.error(`Error al eliminar el reporte con ID ${reportId}:`, error.response?.data || error.message);
-        res.status(error.response?.status || 500).send({
-            error: `Error al eliminar el reporte con ID ${reportId}.`,
-        });
-    }
-});
-
-// Base de datos temporal en memoria
-let database = [];
-
-// Endpoint para cargar datos desde KoboToolbox y almacenarlos en `database`
-app.get('/api', async (req, res) => {
-    try {
-        const response = await request.get(API_URL, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
-            },
-        });
-
-        database = response.data.results.map(report => ({
-            id: report._id.toString(),
-            report_name: report.report_name,
-            email: report.email,
-            location: report.location,
-            issue_type: report.issue_type,
-            urgency_level: report.urgency_level,
-            detection_date: report.detection_date,
-            issue_description: report.issue_description,
+        const reports = response.data.results.map(report => ({
+            kobo_id: report._id.toString(),
+            report_name: report.report_name || "N/A",
+            email: report.email || "N/A",
+            location: report.location || "N/A",
+            issue_type: report.issue_type || "Otro",
+            urgency_level: report.urgency_level || "Bajo",
+            detection_date: report.detection_date || new Date(),
+            issue_description: report.issue_description || "No disponible",
             photo_evidence: report._attachments?.[0]?.download_medium_url || null,
-            resolved: false,
         }));
 
-        res.status(200).send({ count: database.length, results: database });
+        for (const report of reports) {
+            await pool.query(
+                `INSERT INTO reports (kobo_id, report_name, email, location, issue_type, urgency_level, detection_date, issue_description, photo_evidence)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                 ON CONFLICT (kobo_id) DO NOTHING`,
+                [
+                    report.kobo_id,
+                    report.report_name,
+                    report.email,
+                    report.location,
+                    report.issue_type,
+                    report.urgency_level,
+                    report.detection_date,
+                    report.issue_description,
+                    report.photo_evidence,
+                ]
+            );
+        }
+
+        res.status(200).send({ message: "Datos sincronizados con éxito." });
     } catch (error) {
-        console.error('Error al cargar datos de KoboToolbox:', error);
-        res.status(500).send('Error al procesar los datos de KoboToolbox.');
+        console.error("Error al sincronizar datos:", error);
+        res.status(500).send("Error al sincronizar datos.");
     }
 });
 
-let resolvedReports = []; // Lista de reportes resueltos (almacenada en memoria por ahora)
-
-// Ruta para manejar la acción de resolver un reporte
-app.post('/api/reports/:id/resolve', (req, res) => {
-    const { id } = req.params;
-
-    // Busca el reporte en la base de datos simulada de KoboToolbox
-    const report = database.find(r => r._id === id); // Ajusta `_id` según tus datos reales
-    if (!report) {
-        return res.status(404).send({ error: 'Reporte no encontrado' });
+// Ruta para obtener todos los reportes
+app.get("/api/reports", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM reports");
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error("Error al obtener reportes:", error);
+        res.status(500).send("Error al obtener reportes.");
     }
+});
 
-    // Marca el reporte como resuelto
-    report.resolved = true;
+// Ruta para marcar un reporte como resuelto
+app.post("/api/reports/:id/resolve", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query(
+            "UPDATE reports SET resolved = TRUE WHERE id = $1 RETURNING *",
+            [id]
+        );
 
-    // Mueve el reporte a la lista de reportes resueltos
-    resolvedReports.push(report);
+        if (result.rowCount === 0) {
+            return res.status(404).send({ error: "Reporte no encontrado." });
+        }
 
-    // Responde con éxito
-    res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.` });
+        res.status(200).send({ message: "Reporte marcado como resuelto.", report: result.rows[0] });
+    } catch (error) {
+        console.error("Error al marcar reporte como resuelto:", error);
+        res.status(500).send("Error al marcar reporte como resuelto.");
+    }
 });
 
 // Ruta principal para servir `Webgis.html`
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Webgis.html'));
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "Webgis.html"));
 });
 
-// Inicia el servidor
-app.listen(PORT, () => {
+// Inicializar servidor
+app.listen(PORT, async () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    await createTable();
 });
