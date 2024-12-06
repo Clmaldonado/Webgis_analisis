@@ -6,19 +6,31 @@ const API_URL = window.location.hostname === 'localhost'
 let allReports = []; // Almacenar todos los reportes
 let heatLayer; // Variable para almacenar la capa del mapa de calor
 
-// Inicializar el mapa con el centro y zoom bloqueado dentro de un área
-const map = L.map("map", {
-    center: [-37.47197, -72.34518], // Coordenadas del centro del campus UDEC
-    zoom: 18, // Nivel de zoom inicial
-    maxZoom: 19, // Nivel máximo de zoom
-    minZoom: 18, // Nivel mínimo de zoom
-    zoomControl: true, // Control de zoom
-    dragging: true, // Permitir arrastrar el mapa
-    scrollWheelZoom: true, // Permitir zoom con la rueda del ratón
-    doubleClickZoom: true, // Permitir zoom con doble clic
-    boxZoom: true, // Permitir zoom de caja
-    keyboard: true // Permitir controles del teclado
-});
+document.addEventListener("DOMContentLoaded", function () {
+    // Crear el mapa
+    const map = L.map("map", {
+        center: [-37.471968972752805, -72.3451831406545],
+        zoom: 18,
+    });
+
+    const tileLayers = {
+        "OpenStreetMap": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19,
+            minZoom: 16,
+        }),
+        "Esri World Imagery": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics',
+            maxZoom: 18,
+            minZoom: 16,
+        }),
+    };
+
+    // Agregar la capa inicial al mapa
+    tileLayers["OpenStreetMap"].addTo(map);
+
+    // Agregar control de capas al mapa
+    L.control.layers(tileLayers).addTo(map);
 
 // Definir los dos límites rectangulares
 const expandedBounds = L.latLngBounds(
