@@ -675,29 +675,33 @@ function renderResolvedTable(reports) {
 
 // Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
+    console.log(`ID recibido en handleDelete: ${reportId}`);
+    if (!reportId || reportId === "undefined") {
+        console.warn("Warning: Report ID is undefined. Verifica los datos de los botones o el HTML.");
+        return;
+    }
+
+    console.log(`Intentando eliminar reporte con ID: ${reportId}`);
+
     try {
-        console.log(`Intentando eliminar reporte con ID: ${reportId}`);
-
-        // Realizar solicitud DELETE al servidor
-        const response = await fetch(`/api/reports/${reportId}`, {
-            method: 'DELETE',
-        });
-
+        // Realiza la solicitud DELETE al proxy
+        const response = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' });
         if (!response.ok) {
+            console.error("Error al realizar la solicitud DELETE:", await response.text());
             throw new Error(`Error al eliminar el reporte: ${response.status}`);
         }
 
         console.log(`Reporte con ID ${reportId} eliminado correctamente.`);
 
-        // Actualizar la interfaz
+        // Remueve el reporte de la lista local y actualiza la interfaz
         allReports = allReports.filter(report => report.id !== reportId);
-        renderTable(allReports);
-        addMarkersToLayer(allReports);
+        renderTable(allReports); // Actualiza la tabla
+        addMarkersToLayer(allReports); // Actualiza los marcadores
 
         alert(`Reporte con ID ${reportId} eliminado exitosamente.`);
     } catch (error) {
-        console.error('Error al eliminar el reporte:', error);
-        alert('No se pudo eliminar el reporte. Verifica la consola para más detalles.');
+        console.error("Error en handleDelete:", error);
+        alert("No se pudo eliminar el reporte. Verifica la consola para más detalles.");
     }
 }
 
