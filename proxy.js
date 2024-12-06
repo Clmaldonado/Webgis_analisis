@@ -10,7 +10,11 @@ const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7
 // Middleware para habilitar CORS y JSON
 app.use(cors());
 app.use(express.json());
-res.sendFile(path.join(__dirname, 'Webgis.html'));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Webgis.html'));
+});
+
 // Base de datos temporal en memoria
 let database = [];
 let resolvedReports = [];
