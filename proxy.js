@@ -55,8 +55,8 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Webgis.html'));
 });
 
-// Ruta para manejar la API GET (obtener datos de KoboToolbox)
-app.get('/api', async (req, res) => {
+// Ruta para sincronizar datos de KoboToolbox con la base de datos
+app.get('/api/sync', async (req, res) => {
     try {
         const response = await axios.get(API_URL, {
             headers: {
@@ -67,38 +67,29 @@ app.get('/api', async (req, res) => {
         const reports = response.data.results;
 
         for (const report of reports) {
-            console.log('Procesando reporte:', report); // Imprime cada reporte
-
-            const query = `
-                INSERT INTO reports (reporter_name, email, location_description, gps_location, issue_type, issue_description, urgency_level, detection_date, photo_evidence, additional_notes, resolved)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-                ON CONFLICT (id) DO NOTHING;
-            `;
-            const values = [
-                report.reporter_name || 'No especificado',
-                report.email || 'No especificado',
-                report.location_description || 'Sin descripción',
-                report.gps_location || 'Sin coordenadas',
-                report.issue_type || 'Otro',
-                report.issue_description || 'Sin descripción',
-                report.urgency_level || 'No especificado',
-                report.detection_date || new Date().toISOString().split('T')[0],
-                report.photo_evidence || null,
-                report.additional_notes || null,
-                false, // Siempre inicia como no resuelto
-            ];
-
-            try {
-                await pool.query(query, values);
-            } catch (dbError) {
-                console.error('Error al insertar en la base de datos:', dbError);
-            }
+            await pool.query(
+                `INSERT INTO reports (report_name, email, location_description, gps_location, issue_type, issue_description, urgency_level, detection_date, photo_evidence, resolved) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                ON CONFLICT (id) DO NOTHING`, // Si tienes una clave única en `id`, evita duplicados
+                [
+                    report.reporter_name || "Sin nombre",
+                    report.email || "Sin correo",
+                    report.location_description || "Sin descripción",
+                    report.gps_location || "Sin coordenadas",
+                    report.issue_type || "Otro",
+                    report.issue_description || "Sin descripción",
+                    report.urgency_level || "Baja",
+                    report.detection_date || new Date().toISOString().split('T')[0],
+                    report.photo_evidence || null,
+                    false, // Los datos sincronizados inicialmente no estarán resueltos
+                ]
+            );
         }
 
-        res.status(200).json({ message: 'Datos sincronizados con la base de datos.' });
+        res.status(200).send("Datos sincronizados correctamente.");
     } catch (error) {
-        console.error('Error al sincronizar datos de KoboToolbox:', error);
-        res.status(500).send('Error al procesar los datos de KoboToolbox.');
+        console.error("Error al sincronizar datos de KoboToolbox:", error);
+        res.status(500).send("Error al sincronizar datos.");
     }
 });
 
