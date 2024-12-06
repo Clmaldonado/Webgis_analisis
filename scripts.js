@@ -674,8 +674,8 @@ async function handleDelete(reportId) {
     try {
         console.log(`Intentando eliminar reporte con ID: ${reportId}`);
         
-        // Solicitud DELETE al servidor
-        const response = await fetch(`${API_URL}/reports/${reportId}`, { // Ajusta `/reports/` si tu endpoint espera otro formato
+        // Realiza la solicitud DELETE al servidor
+        const response = await fetch(`/api/reports/${reportId}`, { 
             method: 'DELETE',
         });
 
@@ -685,9 +685,10 @@ async function handleDelete(reportId) {
 
         console.log(`Reporte con ID ${reportId} eliminado correctamente.`);
 
-        // Actualiza la tabla y elimina el marcador correspondiente
-        removeReportFromTable(reportId);
-        removeMarkerFromMap(reportId);
+        // Actualiza los datos en la interfaz después de eliminar
+        allReports = allReports.filter(report => report.id !== reportId); // Remueve el reporte de la lista
+        renderTable(allReports); // Actualiza la tabla
+        addMarkersToLayer(allReports); // Actualiza los marcadores
 
         alert(`Reporte con ID ${reportId} eliminado exitosamente.`);
     } catch (error) {
