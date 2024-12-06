@@ -5,7 +5,56 @@ const API_URL = window.location.hostname === 'localhost'
 
 let allReports = []; // Almacenar todos los reportes
 let heatLayer; // Variable para almacenar la capa del mapa de calor
+let token = null; // Token para las solicitudes autenticadas
 
+// Manejar inicio de sesión
+document.getElementById('login-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Inicio de sesión fallido');
+        }
+
+        const data = await response.json();
+        token = data.token;
+        localStorage.setItem('token', token); // Guarda el token en el navegador
+        alert('Inicio de sesión exitoso');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Credenciales inválidas');
+    }
+});
+
+// Modifica la función para enviar el token en solicitudes protegidas
+async function deleteReport(reportId) {
+    try {
+        const response = await fetch(`/api/reports/${reportId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`, // Adjunta el token
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al eliminar el reporte');
+        }
+
+        alert('Reporte eliminado con éxito');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('No se pudo eliminar el reporte');
+    }
+}
 
     // Crear el mapa
     const map = L.map("map", {
