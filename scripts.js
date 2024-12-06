@@ -231,42 +231,44 @@ function getMarkerOptions(urgencyLevel) {
 }
 
 // Función para cargar reportes desde la API
+// Función para cargar reportes desde la API
 async function fetchReports() {
     try {
-        const response = await fetch(API_URL);
+        // Hacer la solicitud a la API
+        const response = await fetch(`${API_URL}/reports/pending`);
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
+        // Obtener los datos en formato JSON
         const data = await response.json();
 
-        // Verifica qué datos devuelve la API
-        console.log("Datos obtenidos de la API:", data.results);
+        // Verificar la estructura de los datos recibidos
+        console.log("Datos obtenidos de la API:", data);
 
-        return data.results.map(report => ({
-            id: report._id?.toString() || "N/A", // Convertir _id a string si está presente
-            report_name: report.report_name || "Nombre no disponible", // Valor por defecto
-            email: report.email || "Correo no disponible",
-            location: report.location || "Ubicación no especificada",
-            // Traducción de tipos de problema
-            issue_type: report.issue_type === "structural" ? "Falla estructural" :
-                        report.issue_type === "electrical" ? "Problema eléctrico" :
-                        report.issue_type === "landscaping" ? "Daño en áreas verdes" :
-                        report.issue_type === "other" ? "Otro" :
-                        "Tipo no especificado", // Valor por defecto si no coincide
-            // Traducción de urgencia
-            urgency_level: report.urgency_level === "low" ? "Bajo" :
-                           report.urgency_level === "medium" ? "Medio" :
-                           report.urgency_level === "high" ? "Alto" :
-                           "Urgencia no especificada", // Valor por defecto si no coincide
-            detection_date: report.detection_date || "Fecha no disponible",
-            issue_description: report.issue_description || "Descripción no disponible",
-            photo_evidence: report._attachments?.[0]?.download_medium_url || null, // Nulo si no hay evidencia
+        // Mapear los datos según la estructura de tu base de datos y frontend
+        return data.map(report => ({
+            id: report.id || "N/A", // Convertir id a string si está presente
+            reporter_name: report.reporter_name || "Nombre no disponible", // Campo para el nombre del reportante
+            email: report.email || "Correo no disponible", // Email
+            gps_location: report.gps_location || "Sin coordenadas", // Coordenadas GPS
+            location_description: report.location_description || "Sin descripción", // Descripción de la ubicación
+            issue_type: report.issue_type || "No especificado", // Tipo de problema
+            urgency_level: report.urgency_level || "No especificado", // Urgencia
+            detection_date: report.detection_date || "Sin fecha", // Fecha
+            issue_description: report.issue_description || "Sin descripción", // Descripción del problema
+            photo_evidence: report.photo_evidence || null, // Evidencia fotográfica
+            resolved: report.resolved || false, // Estado del reporte
         }));
     } catch (error) {
+        // Manejo de errores
         console.error("Error al cargar los datos:", error);
-        alert("Hubo un problema al cargar los reportes. Por favor, inténtelo más tarde.");
+
+        // Mostrar mensaje en la interfaz de usuario si ocurre un error
+        document.getElementById("error-message").textContent = 
+            "No se pudieron cargar los reportes. Por favor, intente más tarde.";
         return [];
     }
 }
+
 
 
 // Función para calcular estadísticas
