@@ -459,7 +459,7 @@ renderCharts(allReports, resolvedReports);
 
 
 // Función para renderizar marcadores en el mapa
-function renderMapMarkers(reports) {
+function addMarkersToLayer(reports) {
     // Limpiar todos los marcadores existentes
     markerLayer.clearLayers();
     reports.forEach(report => {
