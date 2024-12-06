@@ -1,43 +1,80 @@
 const express = require('express');
-const axios = require('axios'); // Aquí asegúrate de usar 'axios' en lugar de 'request'
-const cors = require('cors'); // Habilitar CORS
+const axios = require('axios');
+const cors = require('cors');
 const path = require('path');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FORM_ID = 'aPk24s6jb5BSdEJRnPqpW7'; // ID del formulario
 const API_URL = `https://kf.kobotoolbox.org/api/v2/assets/${FORM_ID}/data/`;
+const SECRET_KEY = process.env.SECRET_KEY || 'clave_super_secreta'; // Cambia esto en producción
 
 // Middleware para habilitar CORS
-app.use(cors()); // Permitir todas las solicitudes de todos los orígenes
-
-// Middleware para manejar JSON
+app.use(cors());
 app.use(express.json());
 
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
-
-// Servir archivos estáticos desde la carpeta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ruta para manejar la API GET (obtener datos)
-app.get('/api', async (req, res) => {
-    try {
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa la variable de entorno para el token
-            },
-        });
-        res.status(response.status).send(response.data);
-    } catch (error) {
-        console.error('Error al realizar la solicitud a la API:', error);
-        res.status(500).send('Error al procesar los datos de la API.');
+// Simulación de usuarios registrados
+const users = [
+    {
+        username: 'admin',
+        password: bcrypt.hashSync('admin123', 10), // Contraseña "admin123" hasheada
+    },
+];
+
+// Middleware de autenticación
+const authenticateJWT = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(403).send('Token requerido');
     }
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).send('Token inválido');
+        }
+        req.user = user;
+        next();
+    });
+};
+
+// Rutas de autenticación
+app.post('/register', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).send('Usuario y contraseña son requeridos');
+    }
+
+    // Verifica si el usuario ya existe
+    if (users.some((user) => user.username === username)) {
+        return res.status(400).send('El usuario ya existe');
+    }
+
+    // Hashea la contraseña y guarda el usuario
+    const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ username, password: hashedPassword });
+    res.status(201).send('Usuario registrado con éxito');
 });
 
-app.delete('/api/reports/:id', async (req, res) => {
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    const user = users.find((u) => u.username === username);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.status(401).send('Credenciales inválidas');
+    }
+
+    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token });
+});
+
+// Ruta protegida para eliminar reportes
+app.delete('/api/reports/:id', authenticateJWT, async (req, res) => {
     const reportId = req.params.id;
-    console.log(`Intentando eliminar reporte con ID: ${reportId}`);
 
     try {
         const response = await axios.delete(`${API_URL}${reportId}/`, {
@@ -55,63 +92,7 @@ app.delete('/api/reports/:id', async (req, res) => {
     }
 });
 
-
-
-// Base de datos temporal en memoria
-let database = [];
-
-// Endpoint para cargar datos desde KoboToolbox y almacenarlos en `database`
-app.get('/api', async (req, res) => {
-    try {
-        const response = await request.get(API_URL, {
-            headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
-            },
-        });
-
-        database = response.data.results.map(report => ({
-            id: report._id.toString(),
-            report_name: report.report_name,
-            email: report.email,
-            location: report.location,
-            issue_type: report.issue_type,
-            urgency_level: report.urgency_level,
-            detection_date: report.detection_date,
-            issue_description: report.issue_description,
-            photo_evidence: report._attachments?.[0]?.download_medium_url || null,
-            resolved: false,
-        }));
-
-        res.status(200).send({ count: database.length, results: database });
-    } catch (error) {
-        console.error('Error al cargar datos de KoboToolbox:', error);
-        res.status(500).send('Error al procesar los datos de KoboToolbox.');
-    }
-});
-
-let resolvedReports = []; // Lista de reportes resueltos (almacenada en memoria por ahora)
-
-// Ruta para manejar la acción de resolver un reporte
-app.post('/api/reports/:id/resolve', (req, res) => {
-    const { id } = req.params;
-
-    // Busca el reporte en la base de datos simulada de KoboToolbox
-    const report = database.find(r => r._id === id); // Ajusta `_id` según tus datos reales
-    if (!report) {
-        return res.status(404).send({ error: 'Reporte no encontrado' });
-    }
-
-    // Marca el reporte como resuelto
-    report.resolved = true;
-
-    // Mueve el reporte a la lista de reportes resueltos
-    resolvedReports.push(report);
-
-    // Responde con éxito
-    res.status(200).send({ message: `Reporte con ID ${id} marcado como resuelto.` });
-});
-
-// Ruta principal para servir `Webgis.html`
+// Ruta principal para servir el archivo HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Webgis.html'));
 });
