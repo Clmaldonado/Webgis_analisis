@@ -671,31 +671,28 @@ function renderResolvedTable(reports) {
 
 // Función para manejar la eliminación de reportes
 async function handleDelete(reportId) {
-    if (!reportId || reportId === "N/A") {
-        console.error("ID no válido para eliminación:", reportId);
-        alert("Error: ID no válido. No se puede eliminar este reporte.");
-        return;
-    }
-
     try {
         console.log(`Intentando eliminar reporte con ID: ${reportId}`);
-        const response = await fetch(`${API_URL}/reports/${reportId}`, {
+        
+        // Solicitud DELETE al servidor
+        const response = await fetch(`${API_URL}/reports/${reportId}`, { 
             method: 'DELETE',
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Error al eliminar el reporte: ${errorData.error}`);
+            throw new Error(`Error al eliminar el reporte: ${response.status}`);
         }
 
         console.log(`Reporte con ID ${reportId} eliminado correctamente.`);
-        allReports = allReports.filter(report => report.id !== reportId); // Actualizar la lista
-        renderTable(allReports); // Refrescar la tabla
-        addMarkersToLayer(allReports); // Refrescar los marcadores
+
+        // Actualiza la tabla y elimina el marcador correspondiente
+        removeReportFromTable(reportId);
+        removeMarkerFromMap(reportId);
+
         alert(`Reporte con ID ${reportId} eliminado exitosamente.`);
     } catch (error) {
-        console.error("Error al eliminar el reporte:", error.message);
-        alert(`No se pudo eliminar el reporte. Error: ${error.message}`);
+        console.error("Error al eliminar el reporte:", error);
+        alert("No se pudo eliminar el reporte. Verifica la consola para más detalles.");
     }
 }
 
