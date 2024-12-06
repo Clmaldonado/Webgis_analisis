@@ -5,7 +5,8 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/';
+const FORM_ID = 'aPk24s6jb5BSdEJRnPqpW7'; // ID del formulario
+const API_URL = `https://kf.kobotoolbox.org/api/v2/assets/${FORM_ID}/data/`;
 
 // Middleware para habilitar CORS
 app.use(cors()); // Permitir todas las solicitudes de todos los orígenes
@@ -34,25 +35,26 @@ app.get('/api', async (req, res) => {
     }
 });
 
-// Ruta para manejar la API DELETE (eliminar un reporte por ID)
+// Ruta para eliminar un reporte por ID
 app.delete('/api/reports/:id', async (req, res) => {
-    const { id } = req.params;
+    const reportId = req.params.id;
+
     try {
-        const response = await axios.delete(`${API_URL}${id}/`, { // Verifica que la URL de API_URL esté correcta
+        const response = await axios.delete(`${API_URL}${reportId}/`, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+                Authorization: `Token tu_token_aquí`, // Reemplaza esto con tu token de API
             },
         });
 
-        res.status(response.status).send({ message: `Reporte con ID ${id} eliminado.` });
+        console.log(`Reporte con ID ${reportId} eliminado de KoboToolbox.`);
+        res.status(200).send({ message: `Reporte con ID ${reportId} eliminado.` });
     } catch (error) {
-        console.error('Error al eliminar el reporte:', error.response?.data || error.message);
+        console.error(`Error al eliminar el reporte con ID ${reportId}:`, error.response?.data || error.message);
         res.status(error.response?.status || 500).send({
-            error: `Error al eliminar el reporte.`,
+            error: `Error al eliminar el reporte con ID ${reportId}.`,
         });
     }
 });
-
 
 // Base de datos temporal en memoria
 let database = [];
