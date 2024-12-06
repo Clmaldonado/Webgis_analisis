@@ -63,12 +63,39 @@ app.get('/api', async (req, res) => {
                 Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
-        res.status(response.status).send(response.data);
+
+        const reports = response.data.results;
+
+        for (const report of reports) {
+            const query = `
+                INSERT INTO reports (reporter_name, email, location_description, gps_location, issue_type, issue_description, urgency_level, detection_date, photo_evidence, additional_notes, resolved)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                ON CONFLICT (id) DO NOTHING;
+            `;
+            const values = [
+                report.reporter_name,
+                report.email,
+                report.location_description,
+                report.gps_location,
+                report.issue_type,
+                report.issue_description,
+                report.urgency_level,
+                report.detection_date,
+                report.photo_evidence,
+                report.additional_notes,
+                false, // Siempre inicia como no resuelto
+            ];
+
+            await pool.query(query, values);
+        }
+
+        res.status(200).json({ message: 'Datos sincronizados con la base de datos.' });
     } catch (error) {
-        console.error('Error al realizar la solicitud a la API:', error);
-        res.status(500).send('Error al procesar los datos de la API.');
+        console.error('Error al sincronizar datos de KoboToolbox:', error);
+        res.status(500).send('Error al procesar los datos de KoboToolbox.');
     }
 });
+
 
 // Ruta para insertar un reporte en la base de datos
 app.post('/api/reports', async (req, res) => {
