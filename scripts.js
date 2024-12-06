@@ -6,7 +6,7 @@ const API_URL = window.location.hostname === 'localhost'
 let allReports = []; // Almacenar todos los reportes
 let heatLayer; // Variable para almacenar la capa del mapa de calor
 
-document.addEventListener("DOMContentLoaded", function () {
+
     // Crear el mapa
     const map = L.map("map", {
         center: [-37.471968972752805, -72.3451831406545],
