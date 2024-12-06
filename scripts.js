@@ -673,9 +673,9 @@ function renderResolvedTable(reports) {
 async function handleDelete(reportId) {
     try {
         console.log(`Intentando eliminar reporte con ID: ${reportId}`);
-        
-        // Solicitud DELETE al servidor
-        const response = await fetch(`${API_URL}/reports/${reportId}`, { 
+
+        // Realizar solicitud DELETE al servidor
+        const response = await fetch(`/api/reports/${reportId}`, {
             method: 'DELETE',
         });
 
@@ -685,14 +685,15 @@ async function handleDelete(reportId) {
 
         console.log(`Reporte con ID ${reportId} eliminado correctamente.`);
 
-        // Actualiza la tabla y elimina el marcador correspondiente
-        removeReportFromTable(reportId);
-        removeMarkerFromMap(reportId);
+        // Actualizar la interfaz
+        allReports = allReports.filter(report => report.id !== reportId);
+        renderTable(allReports);
+        addMarkersToLayer(allReports);
 
         alert(`Reporte con ID ${reportId} eliminado exitosamente.`);
     } catch (error) {
-        console.error("Error al eliminar el reporte:", error);
-        alert("No se pudo eliminar el reporte. Verifica la consola para más detalles.");
+        console.error('Error al eliminar el reporte:', error);
+        alert('No se pudo eliminar el reporte. Verifica la consola para más detalles.');
     }
 }
 
