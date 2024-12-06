@@ -26,6 +26,8 @@ const expandedBounds = L.latLngBounds(
     [-37.470, -72.343]  // Esquina noreste extendida
 );
 
+
+
 // Evento para limitar el movimiento del mapa dentro de los límites ampliados
 map.on("drag", function () {
     const center = map.getCenter(); // Obtener el centro actual del mapa
@@ -56,21 +58,21 @@ async function loadGeoJSON() {
         const data = await response.json();
 
         // Agregar GeoJSON al mapa con estilo y popups
-        L.geoJSON(data, {
+        const geojsonLayer = L.geoJSON(data, {
             style: function (feature) {
                 return { color: "blue", weight: 2 }; // Estilo predeterminado
             },
             onEachFeature: function (feature, layer) {
-                // Vincula un popup a cada característica, si tiene propiedades
                 if (feature.properties && feature.properties.name) {
                     layer.bindPopup(`<b>${feature.properties.name}</b>`);
                 }
             }
         }).addTo(map);
 
-        console.log("GeoJSON agregado al mapa.");
+        console.log("GeoJSON agregado al mapa:", geojsonLayer);
     } catch (error) {
         console.error("Error al cargar el GeoJSON:", error);
+        alert("No se pudo cargar el GeoJSON. Verifica la consola para más detalles.");
     }
 }
 
@@ -537,14 +539,13 @@ function addMarkersToLayer(reports) {
 
 // Función para alternar visibilidad de los marcadores
 function toggleMarkers() {
-    if (markersVisible) {
-        map.removeLayer(markerLayer); // Ocultar la capa de marcadores
+    if (map.hasLayer(markerLayer)) {
+        map.removeLayer(markerLayer); // Ocultar la capa
         document.getElementById("toggleMarkersButton").textContent = "Mostrar Marcadores";
     } else {
-        markerLayer.addTo(map); // Mostrar la capa de marcadores
+        map.addLayer(markerLayer); // Mostrar la capa
         document.getElementById("toggleMarkersButton").textContent = "Ocultar Marcadores";
     }
-    markersVisible = !markersVisible; // Alternar el estado
 }
 
 // Crear botón para alternar los marcadores
@@ -777,15 +778,21 @@ function applyFilters() {
 
 // Función principal para cargar datos y mostrar todo
 async function displayReports() {
-    allReports = await fetchReports(); // Cargar todos los reportes
+    // Cargar el archivo GeoJSON y agregarlo al mapa
+    await loadGeoJSON();
 
-    // Renderizar todo después de que los datos estén cargados
+    // Cargar todos los reportes desde la API
+    allReports = await fetchReports();
+
+    // Renderizar gráficos con los datos cargados
     renderCharts(allReports, resolvedReports);
-    
-    // Mostrar todo inicialmente
+
+    // Calcular y mostrar estadísticas iniciales
     const statistics = calculateStatistics(allReports);
     displayStatistics(statistics);
-    renderMapMarkers(allReports);
+
+    // Renderizar marcadores en el mapa y mostrar la tabla
+    addMarkersToLayer(allReports); // Usar la función que agrega los marcadores a la capa
     renderTable(allReports);
 
     // Agregar evento al botón de filtros
@@ -794,3 +801,5 @@ async function displayReports() {
 
 // Ejecutar al cargar la página
 displayReports();
+
+
