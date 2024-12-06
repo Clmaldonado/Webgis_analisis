@@ -566,20 +566,15 @@ function renderResolvedTable(reports) {
         const row = document.createElement("tr");
        row.innerHTML = `
             <td>${report.id || "N/A"}</td>
-            <td>${report.report_name || "No especificado"}</td>
-            <td>${report.email || "No especificado"}</td>
-            <td>${report.location || "Sin coordenadas"}</td>
-            <td>${report.location_desc || "Sin descripción"}</td>
-            <td>${report.issue_type || "No especificado"}</td>
+            <td>${report.report_name}</td>
+            <td>${report.email}</td>
+            <td>${report.issue_type}</td>
+            <td>${report.urgency_level}</td>
+            <td>${report.detection_date}</td>
             <td>${report.issue_description || "No disponible"}</td>
-            <td>${report.urgency_level || "No especificado"}</td>
-            <td>${report.detection_date || "Sin fecha"}</td>
-            <td>
-                ${report.photo_evidence 
-                    ? `<a href="${report.photo_evidence}" target="_blank">
-                        <img src="${report.photo_evidence}" alt="Evidencia" style="width: 50px; height: auto;">
-                       </a>` 
-                    : "No disponible"}
+            <td>${report.photo_evidence 
+                ? `<a href="${report.photo_evidence}" target="_blank">Ver evidencia</a>` 
+                : "No disponible"}
             </td>
         `;
         resolvedTableBody.appendChild(row);
