@@ -222,15 +222,22 @@ legend.addTo(map);
 // Función para obtener el color del marcador según la urgencia
 function getMarkerOptions(urgencyLevel) {
     const color = urgencyLevel === "Alto" ? "red" :
-                  urgencyLevel === "Medio" ? "orange" : "yellow";
+                  urgencyLevel === "Medio" ? "orange" :
+                  urgencyLevel === "Bajo" ? "yellow" : "gray"; // Color predeterminado si no coincide
 
     return {
         icon: L.divIcon({
-            className: `custom-marker-${color}`,
-            html: `<div style="background-color:${color}; width: 25px; height: 25px; border-radius: 50%; border: 2px solid white;"></div>`,
+            className: 'custom-marker',
+            html: `<div style="
+                background-color: ${color};
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                border: 2px solid white;">
+            </div>`,
             iconSize: [25, 25],
             iconAnchor: [12, 12]
-        }),
+        })
     };
 }
 
@@ -453,56 +460,43 @@ renderCharts(allReports, resolvedReports);
 
 // Función para renderizar marcadores en el mapa
 function renderMapMarkers(reports) {
-    map.eachLayer(layer => {
-        if (layer instanceof L.Marker) {
-            map.removeLayer(layer);
-        }
-    });
-
+    // Limpiar todos los marcadores existentes
+    markerLayer.clearLayers();
     reports.forEach(report => {
         if (report.location) {
             const coords = report.location.split(" ").map(parseFloat);
             if (coords.length >= 2) {
                 const markerOptions = getMarkerOptions(report.urgency_level);
-                L.marker([coords[0], coords[1]], markerOptions).addTo(map)
+                const marker = L.marker([coords[0], coords[1]], markerOptions)
                     .bindPopup(`
                         <b>${report.report_name}</b><br>
                         <b>Tipo:</b> ${report.issue_type}<br>
                         <b>Descripción:</b> ${report.issue_description}<br>
                         <b>Urgencia:</b> ${report.urgency_level}
                     `);
-            }
-        }
-    });
-}
-
-
-let markerLayer = L.layerGroup(); // Crear una capa de grupo para los marcadores
-let markersVisible = true; // Estado inicial: los marcadores son visibles
-
-// Función para agregar marcadores al mapa
-function addMarkersToLayer(reports) {
-    markerLayer.clearLayers(); // Limpiar la capa antes de agregar nuevos marcadores
-
-    reports.forEach(report => {
-        if (report.location) {
-            const coords = report.location.split(" ").map(parseFloat);
-            if (coords.length >= 2) {
-                const marker = L.marker([coords[0], coords[1]], {
-                    title: report.report_name, // Agregar título para referencia
-                }).bindPopup(`
-                    <b>${report.report_name}</b><br>
-                    <b>Tipo:</b> ${report.issue_type}<br>
-                    <b>Descripción:</b> ${report.issue_description}<br>
-                    <b>Urgencia:</b> ${report.urgency_level}
-                `);
-                markerLayer.addLayer(marker); // Agregar el marcador a la capa de grupo
+                markerLayer.addLayer(marker); // Agregar el marcador al grupo de capas
             }
         }
     });
 
-    markerLayer.addTo(map); // Agregar la capa de grupo al mapa
+    markerLayer.addTo(map); // Agregar la capa de marcadores al mapa
 }
+
+let markerLayer = L.layerGroup().addTo(map); // Crear una capa de grupo para los marcadores
+let markersVisible = true;
+
+// Función para alternar la visibilidad de los marcadores
+function toggleMarkers() {
+    if (markersVisible) {
+        map.removeLayer(markerLayer); // Ocultar marcadores
+        document.getElementById("toggleMarkersButton").textContent = "Mostrar Marcadores";
+    } else {
+        map.addLayer(markerLayer); // Mostrar marcadores
+        document.getElementById("toggleMarkersButton").textContent = "Ocultar Marcadores";
+    }
+    markersVisible = !markersVisible; // Alternar estado
+}
+
 // Función para obtener opciones del marcador según la urgencia
 function getMarkerOptions(urgencyLevel) {
     const color = urgencyLevel === "Alto" ? "red" :
