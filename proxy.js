@@ -11,9 +11,6 @@ const API_URL = 'https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7
 app.use(cors());
 app.use(express.json());
 
-// Servir archivos estáticos desde la carpeta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
 // Base de datos temporal en memoria
 let database = [];
 let resolvedReports = [];
