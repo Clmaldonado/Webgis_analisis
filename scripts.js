@@ -507,6 +507,71 @@ function renderMapMarkers(reports) {
     });
 }
 
+
+let markerLayer = L.layerGroup(); // Crear una capa de grupo para los marcadores
+let markersVisible = true; // Estado inicial: los marcadores son visibles
+
+// Función para agregar marcadores al mapa
+function addMarkersToLayer(reports) {
+    markerLayer.clearLayers(); // Limpiar la capa antes de agregar nuevos marcadores
+
+    reports.forEach(report => {
+        if (report.location) {
+            const coords = report.location.split(" ").map(parseFloat);
+            if (coords.length >= 2) {
+                const marker = L.marker([coords[0], coords[1]], {
+                    title: report.report_name, // Agregar título para referencia
+                }).bindPopup(`
+                    <b>${report.report_name}</b><br>
+                    <b>Tipo:</b> ${report.issue_type}<br>
+                    <b>Descripción:</b> ${report.issue_description}<br>
+                    <b>Urgencia:</b> ${report.urgency_level}
+                `);
+                markerLayer.addLayer(marker); // Agregar el marcador a la capa de grupo
+            }
+        }
+    });
+
+    markerLayer.addTo(map); // Agregar la capa de grupo al mapa
+}
+
+// Función para alternar visibilidad de los marcadores
+function toggleMarkers() {
+    if (markersVisible) {
+        map.removeLayer(markerLayer); // Ocultar la capa de marcadores
+        document.getElementById("toggleMarkersButton").textContent = "Mostrar Marcadores";
+    } else {
+        markerLayer.addTo(map); // Mostrar la capa de marcadores
+        document.getElementById("toggleMarkersButton").textContent = "Ocultar Marcadores";
+    }
+    markersVisible = !markersVisible; // Alternar el estado
+}
+
+// Crear botón para alternar los marcadores
+const toggleMarkersControl = L.control({ position: "topright" });
+toggleMarkersControl.onAdd = function () {
+    const div = L.DomUtil.create("div", "toggle-markers-control");
+    div.innerHTML = `<button id="toggleMarkersButton" class="leaflet-control-layers">Ocultar Marcadores</button>`;
+    div.style.padding = "5px";
+    div.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+    div.style.borderRadius = "5px";
+    L.DomEvent.disableClickPropagation(div); // Evitar que interfiera con el mapa
+    return div;
+};
+toggleMarkersControl.addTo(map); // Agregar el control al mapa
+
+// Manejar evento del botón
+document.addEventListener("click", (event) => {
+    if (event.target && event.target.id === "toggleMarkersButton") {
+        toggleMarkers();
+    }
+});
+
+// Llama a `addMarkersToLayer` después de cargar los datos
+addMarkersToLayer(allReports);
+
+
+
 // Función para renderizar la tabla
 function renderTable(reports) {
     const tableBody = document.querySelector("#reportTable tbody");
