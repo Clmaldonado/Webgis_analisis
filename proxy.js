@@ -37,14 +37,16 @@ app.get('/api', async (req, res) => {
 // Ruta para manejar la API DELETE (eliminar un reporte por ID)
 app.delete('/api/reports/:id', async (req, res) => {
     const reportId = req.params.id;
+    console.log(`ID recibido para eliminar: ${reportId}`); // Para depuración
 
     try {
         const response = await axios.delete(`${API_URL}${reportId}/`, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
+                Authorization: `Token ${TOKEN}`, // Usa el token para autenticar
             },
         });
 
+        console.log(`Eliminado con éxito: ${response.data}`); // Para confirmar respuesta de Kobo
         res.status(response.status).send({ message: `Reporte con ID ${reportId} eliminado.` });
     } catch (error) {
         console.error(`Error al eliminar el reporte con ID ${reportId}:`, error.response?.data || error.message);
