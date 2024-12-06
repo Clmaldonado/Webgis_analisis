@@ -95,17 +95,21 @@ app.delete('/api/reports/:id', authenticateJWT, async (req, res) => {
 // Ruta principal para servir el archivo HTML
 app.get('/api', async (req, res) => {
     try {
-        const response = await axios.get(API_URL, {
+        const response = await axios.get(`https://kf.kobotoolbox.org/api/v2/assets/${FORM_ID}/data/`, {
             headers: {
-                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa tu token aquí
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`,
             },
         });
-        res.status(response.status).send(response.data);
+        res.status(200).json(response.data);
     } catch (error) {
-        console.error('Error al realizar la solicitud a la API:', error);
-        res.status(500).send('Error al procesar los datos de la API.');
+        console.error('Error al realizar la solicitud a la API:', error.message);
+        res.status(error.response?.status || 500).send({
+            message: 'Error al procesar los datos de la API.',
+            details: error.response?.data || error.message,
+        });
     }
 });
+
 
 
 // Inicia el servidor
