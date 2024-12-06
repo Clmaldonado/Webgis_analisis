@@ -571,7 +571,6 @@ document.addEventListener("click", (event) => {
 addMarkersToLayer(allReports);
 
 
-
 // Función para renderizar la tabla
 function renderTable(reports) {
     const tableBody = document.querySelector("#reportTable tbody");
