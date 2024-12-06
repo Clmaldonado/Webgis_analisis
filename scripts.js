@@ -47,47 +47,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 
-// Cargar y agregar el archivo GeoJSON al mapa
-async function loadGeoJSON() {
-    const geojsonUrl = '/data/CAMPUS.geojson'; // Asegúrate de que esta ruta sea correcta
-
-    try {
-        const response = await fetch(geojsonUrl);
-        if (!response.ok) throw new Error(`Error al cargar el archivo GeoJSON: ${response.statusText}`);
-
-        const data = await response.json();
-
-        // Crear la capa GeoJSON con un estilo visible
-        const geojsonLayer = L.geoJSON(data, {
-            style: function (feature) {
-                return {
-                    color: "blue",        // Color del borde
-                    weight: 3,           // Grosor del borde
-                    opacity: 1,          // Opacidad del borde
-                    fillColor: "cyan",   // Color de relleno
-                    fillOpacity: 0.5     // Opacidad del relleno
-                };
-            },
-            onEachFeature: function (feature, layer) {
-                // Vincula un popup con propiedades (si existen)
-                if (feature.properties && feature.properties.name) {
-                    layer.bindPopup(`<b>${feature.properties.name}</b>`);
-                }
-            }
-        });
-
-        // Agregar la capa al mapa
-        geojsonLayer.addTo(map);
-
-        // Ajustar los límites del mapa al GeoJSON
-        map.fitBounds(geojsonLayer.getBounds());
-
-        console.log("GeoJSON agregado al mapa.");
-    } catch (error) {
-        console.error("Error al cargar el GeoJSON:", error);
-    }
-}
-
 
 // URL del formulario de KoboToolbox
 const FORM_URL = "https://ee.kobotoolbox.org/z0lihxcE"; // Reemplaza con la URL de tu formulario
@@ -800,8 +759,6 @@ function applyFilters() {
 
 // Función principal para cargar datos y mostrar todo
 async function displayReports() {
-    // Cargar el archivo GeoJSON y agregarlo al mapa
-    await loadGeoJSON();
 
     // Cargar todos los reportes desde la API
     allReports = await fetchReports();
