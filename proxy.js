@@ -93,9 +93,20 @@ app.delete('/api/reports/:id', authenticateJWT, async (req, res) => {
 });
 
 // Ruta principal para servir el archivo HTML
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Webgis.html'));
+app.get('/api', async (req, res) => {
+    try {
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Token ${process.env.KOBOTOOLBOX_API_KEY}`, // Usa tu token aquí
+            },
+        });
+        res.status(response.status).send(response.data);
+    } catch (error) {
+        console.error('Error al realizar la solicitud a la API:', error);
+        res.status(500).send('Error al procesar los datos de la API.');
+    }
 });
+
 
 // Inicia el servidor
 app.listen(PORT, () => {
