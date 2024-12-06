@@ -647,6 +647,7 @@ function addMarker(report) {
         }).addTo(map);
         marker.bindPopup(`
             <b>${report.report_name}</b><br>
+            <b>ID:</b> ${report.id}<br>
             <b>Tipo:</b> ${report.issue_type}<br>
             <b>Descripción:</b> ${report.issue_description}<br>
             <b>Urgencia:</b> ${report.urgency_level}<br>
