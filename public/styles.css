@@ -1,0 +1,337 @@
+/* General Reset */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* Encabezado */
+header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    border-bottom: 4px solid #1abc9c;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Contenedor Principal */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Sección de Filtros */
+#filters-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+#filters-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+    color: #2c3e50;
+}
+
+#filters-section div {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+#filters-section label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #333;
+}
+
+#filters-section input[type="date"],
+#filters-section select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: auto;
+    flex: 1 1 auto;
+}
+
+#filters-section button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #1abc9c;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#filters-section button:hover {
+    background-color: #16a085;
+}
+
+/* Mapa */
+#map-section {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+#map {
+    height: 500px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.legend {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+}
+
+.legend h4 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.legend div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend .color-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+
+.legend .red {
+    background: red;
+}
+
+.legend .orange {
+    background: orange;
+}
+
+.legend .yellow {
+    background: yellow;
+}
+
+/* Estadísticas */
+#statistics-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+#statistics-section h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+    color: #2c3e50;
+}
+
+/* Tabla */
+/* Contenedor de las tablas */
+#table-section, #resolved-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Tablas responsivas */
+#reportTable, #resolvedTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    table-layout: auto; /* Ajuste automático del ancho */
+}
+
+#reportTable th, #reportTable td,
+#resolvedTable th, #resolvedTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 0.9rem;
+    word-wrap: break-word; /* Para ajustar texto largo */
+}
+
+/* Estilo responsivo: mejor visualización en dispositivos móviles */
+@media screen and (max-width: 768px) {
+    #reportTable th, #resolvedTable th {
+        background-color: #f1f1f1; /* Resaltar encabezados */
+        font-size: 0.9rem;
+    }
+
+    #reportTable td, #resolvedTable td {
+        font-size: 0.85rem;
+        word-wrap: break-word; /* Ajustar contenido largo */
+    }
+
+    #reportTable, #resolvedTable {
+        display: block;
+        overflow-x: auto; /* Habilitar desplazamiento horizontal */
+        white-space: nowrap; /* Evitar que el contenido se desborde */
+    }
+
+    /* Aumentar legibilidad */
+    #reportTable td, #reportTable th,
+    #resolvedTable td, #resolvedTable th {
+        padding: 8px;
+    }
+}
+
+/* Estilo general del botón */
+#exportExcel {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #1abc9c;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+/* Efecto hover */
+#exportExcel:hover {
+    background-color: #16a085;
+}
+
+/* Estilo responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+    #exportExcel {
+        font-size: 14px;
+        padding: 8px 15px;
+        width: 100%; /* Ocupa todo el ancho en móviles */
+    }
+}
+
+.heatmap-control {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.heatmap-btn {
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.heatmap-btn:hover {
+    background-color: #16a085;
+}
+
+.form-btn {
+    margin-left: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.form-btn:hover {
+    background-color: #45a049; /* Verde más oscuro */
+}
+
+
+/* Botón verde para Resolver */
+button.resolve-btn {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.resolve-btn:hover {
+    background-color: #45a049; /* Verde oscuro al pasar el mouse */
+    opacity: 0.9;
+}
+
+/* Ajustes para los botones Eliminar (rojo) */
+button.delete-btn {
+    background-color: #f44336; /* Rojo */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.delete-btn:hover {
+    background-color: #d32f2f; /* Rojo oscuro al pasar el mouse */
+    opacity: 0.9;
+}
+.chart {
+    max-width: 400px; /* Reduce el ancho máximo */
+    max-height: 300px; /* Reduce el alto máximo */
+    margin: 20px auto; /* Centra los gráficos */
+    border: 1px solid #ddd; /* Opcional: Agrega un borde */
+    border-radius: 10px; /* Opcional: Redondea los bordes */
+    background-color: #f9f9f9; /* Opcional: Fondo claro */
+}
+#charts-section div {
+    display: flex;
+    flex-wrap: wrap; /* Permitir que los gráficos se acomoden en filas */
+    justify-content: center;
+    gap: 20px; /* Espaciado entre gráficos */
+}
+.stats-item {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #333;
+}
+.custom-marker div {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS para Gestión de Infraestructura</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header>
+        <h1>WebGIS para Gestión de Afectaciones - Campus Los Ángeles</h1>
+    </header>
+    
+    <main>
+        <!-- Filtros -->
+        <section id="filters-section">
+            <h2>Filtros</h2>
+            <div>
+                <label for="filter-start-date">Fecha Inicio:</label>
+                <input type="date" id="filter-start-date">
+                <label for="filter-end-date">Fecha Fin:</label>
+                <input type="date" id="filter-end-date">
+            </div>
+            <div>
+                <label for="filter-type">Tipo de Afectación:</label>
+                <select id="filter-type">
+                    <option value="">Todos</option>
+                    <option value="Falla estructural">Falla estructural</option>
+                    <option value="Problema eléctrico">Problema eléctrico</option>
+                    <option value="Daño en áreas verdes">Daño en áreas verdes</option>
+                </select>
+            </div>
+            <div>
+                <label for="filter-urgency">Urgencia:</label>
+                <select id="filter-urgency">
+                    <option value="">Todos</option>
+                    <option value="Alto">Alto</option>
+                    <option value="Medio">Medio</option>
+                    <option value="Bajo">Bajo</option>
+                </select>
+            </div>
+            <button id="apply-filters">Aplicar Filtros</button>
+        </section>        
+
+        <!-- Mapa -->
+        <section id="map-section">
+            <div id="map"></div>
+            <div class="legend">
+                <h4>Leyenda</h4>
+                <div><span class="color-box red"></span> Alto</div>
+                <div><span class="color-box orange"></span> Medio</div>
+                <div><span class="color-box yellow"></span> Bajo</div>
+            </div>
+        </section>
+
+        <!-- Estadísticas -->
+        <section id="statistics-section">
+            <h2>Estadísticas Generales</h2>
+            <div id="statistics"></div>
+        </section>
+        <!-- Gráficos -->
+        <section id="charts-section">
+            <h2>Gráficos</h2>
+            <div style="display: flex; justify-content: space-around; gap: 20px; flex-wrap: wrap;">
+                <canvas id="typeChart" class="chart"></canvas>
+                <canvas id="urgencyChart" class="chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Tabla -->
+        <section id="table-section">
+            <h2>Tabla de Reportes</h2>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+            <button id="openFormButton" class="form-btn">Abrir Formulario</button>
+            <button id="exportExcel">Exportar a Excel</button>
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Reportante</th>
+                        <th>Email</th>
+                        <th>Coordenadas</th>   
+                        <th>Descripción de Ubicación</th>
+                        <th>Tipo de Afectación</th>
+                        <th>Descripción del Problema</th>
+                        <th>Nivel de Urgencia</th>
+                        <th>Fecha de Detección</th>
+                        <th>Evidencia Fotográfica</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+        <section id="resolved-section">
+            <h2>Afectaciones Resueltas</h2>
+            <table id="resolvedTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Reportante</th>
+                        <th>Email</th>
+                        <th>Coordenadas</th>   
+                        <th>Descripción de Ubicación</th>
+                        <th>Tipo de Afectación</th>
+                        <th>Descripción del Problema</th>
+                        <th>Nivel de Urgencia</th>
+                        <th>Fecha de Detección</th>
+                        <th>Evidencia Fotográfica</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Se llenará dinámicamente -->
+                </tbody>
+            </table>
+        </section> 
+    </main>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Librería de gráficos -->
+    <script src="scripts.js"></script>
+</body>
+</html>
