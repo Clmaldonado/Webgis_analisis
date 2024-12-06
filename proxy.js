@@ -90,20 +90,21 @@ app.post('/api/reports', async (req, res) => {
     }
 });
 
-// Ruta para obtener todos los reportes de la base de datos
+// Endpoints en tu servidor/proxy
 app.get('/api/reports/pending', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM reports WHERE resolved = FALSE');
-        res.status(200).send(result.rows);
+        const result = await pool.query('SELECT * FROM reports WHERE resolved = false');
+        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error al obtener reportes pendientes:', error);
         res.status(500).send('Error al obtener reportes pendientes.');
     }
 });
+
 app.get('/api/reports/resolved', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM reports WHERE resolved = TRUE');
-        res.status(200).send(result.rows);
+        const result = await pool.query('SELECT * FROM reports WHERE resolved = true');
+        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error al obtener reportes resueltos:', error);
         res.status(500).send('Error al obtener reportes resueltos.');
