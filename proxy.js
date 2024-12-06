@@ -35,26 +35,25 @@ app.get('/api', async (req, res) => {
     }
 });
 
-// Ruta para eliminar un reporte por ID
 app.delete('/api/reports/:id', async (req, res) => {
     const reportId = req.params.id;
+    console.log(`Solicitud para eliminar el reporte con ID: ${reportId}`);
 
     try {
-        const response = await axios.delete(`${API_URL}${reportId}/`, {
-            headers: {
-                Authorization: `Token tu_token_aquí`, // Reemplaza esto con tu token de API
-            },
+        const response = await axios.delete(`https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/${reportId}/`, {
+            headers: { Authorization: `Token tu_token_aquí` }, // Reemplaza con tu token válido
         });
 
-        console.log(`Reporte con ID ${reportId} eliminado de KoboToolbox.`);
+        console.log(`Eliminado correctamente en KoboToolbox: ${response.status}`);
         res.status(200).send({ message: `Reporte con ID ${reportId} eliminado.` });
     } catch (error) {
-        console.error(`Error al eliminar el reporte con ID ${reportId}:`, error.response?.data || error.message);
+        console.error("Error al eliminar en KoboToolbox:", error.response?.data || error.message);
         res.status(error.response?.status || 500).send({
             error: `Error al eliminar el reporte con ID ${reportId}.`,
         });
     }
 });
+
 
 // Base de datos temporal en memoria
 let database = [];
