@@ -49,7 +49,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 // Cargar y agregar el archivo GeoJSON al mapa
 async function loadGeoJSON() {
-    const geojsonUrl = '/data/CAMPUS.geojson'; // Ajusta la ruta si es necesario
+    const geojsonUrl = '/data/CAMPUS.geojson'; // Asegúrate de que esta ruta sea correcta
 
     try {
         const response = await fetch(geojsonUrl);
@@ -57,28 +57,36 @@ async function loadGeoJSON() {
 
         const data = await response.json();
 
-        // Agregar GeoJSON al mapa con estilo y popups
+        // Crear la capa GeoJSON con un estilo visible
         const geojsonLayer = L.geoJSON(data, {
             style: function (feature) {
-                return { color: "blue", weight: 2 }; // Estilo predeterminado
+                return {
+                    color: "blue",        // Color del borde
+                    weight: 3,           // Grosor del borde
+                    opacity: 1,          // Opacidad del borde
+                    fillColor: "cyan",   // Color de relleno
+                    fillOpacity: 0.5     // Opacidad del relleno
+                };
             },
             onEachFeature: function (feature, layer) {
+                // Vincula un popup con propiedades (si existen)
                 if (feature.properties && feature.properties.name) {
                     layer.bindPopup(`<b>${feature.properties.name}</b>`);
                 }
             }
-        }).addTo(map);
+        });
 
-        console.log("GeoJSON agregado al mapa:", geojsonLayer);
+        // Agregar la capa al mapa
+        geojsonLayer.addTo(map);
+
+        // Ajustar los límites del mapa al GeoJSON
+        map.fitBounds(geojsonLayer.getBounds());
+
+        console.log("GeoJSON agregado al mapa.");
     } catch (error) {
         console.error("Error al cargar el GeoJSON:", error);
-        alert("No se pudo cargar el GeoJSON. Verifica la consola para más detalles.");
     }
 }
-
-// Llamar a la función para cargar el GeoJSON después de inicializar el mapa
-loadGeoJSON();
-
 
 
 // URL del formulario de KoboToolbox
