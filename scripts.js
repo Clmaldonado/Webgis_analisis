@@ -594,9 +594,13 @@ function renderTable(reports) {
         button.addEventListener("click", (e) => handleResolve(e.target.dataset.id));
     });
 
-    document.querySelectorAll(".delete-btn").forEach((button) => {
-        button.addEventListener("click", (e) => handleDelete(e.target.dataset.id));
+    document.querySelectorAll(".delete-btn").forEach(button => {
+        button.addEventListener("click", event => {
+            const reportId = event.target.dataset.id;
+            handleDelete(reportId);
+        });
     });
+
 
 // Función para manejar la resolución de reportes
 async function handleResolve(reportId) {
