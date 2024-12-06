@@ -16,6 +16,9 @@ app.use(express.json());
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
 
+// Servir archivos estáticos desde la carpeta 'public'
+app.use(express.static("public"));
+
 // Ruta para manejar la API GET (obtener datos)
 app.get('/api', async (req, res) => {
     try {
