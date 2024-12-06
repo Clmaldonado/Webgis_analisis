@@ -582,7 +582,7 @@ function renderTable(reports) {
             </td>
             <td>
                 <button class="resolve-btn" onclick="handleResolve('${report.id}')">Resolver</button>
-                <button class="delete-btn" data-id="${report.id}">Eliminar</button>
+                <button class="delete-btn" onclick="handleDelete('${report.id}')">Eliminar</button>
             </td>
         `;
         tableBody.appendChild(row);
