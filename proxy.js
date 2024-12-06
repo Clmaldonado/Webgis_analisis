@@ -41,7 +41,7 @@ app.delete('/api/reports/:id', async (req, res) => {
 
     try {
         const response = await axios.delete(`https://kf.kobotoolbox.org/api/v2/assets/aPk24s6jb5BSdEJRnPqpW7/data/${reportId}/`, {
-            headers: { Authorization: `Token tu_token_aquí` }, // Reemplaza con tu token válido
+            headers: { Authorization: `ffa135f8b667ddb65202f7b5209e6ebd881aa542` }, 
         });
 
         console.log(`Eliminado correctamente en KoboToolbox: ${response.status}`);
