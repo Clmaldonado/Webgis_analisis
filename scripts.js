@@ -1,7 +1,7 @@
 // URL de la API del Proxy local
 const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:3000/api' // En desarrollo local
-    : 'https://webgis-analisis.onrender.com/api'; // En producción
+    ? 'http://localhost:3000/api' // Desarrollo local
+    : 'https://webgis-analisis.onrender.com/api'; // Producción
 
 let allReports = []; // Almacenar todos los reportes
 let heatLayer; // Variable para almacenar la capa del mapa de calor
