@@ -67,23 +67,30 @@ app.get('/api/sync', async (req, res) => {
         const reports = response.data.results;
 
         for (const report of reports) {
-            await pool.query(
-                `INSERT INTO reports (report_name, email, location_description, gps_location, issue_type, issue_description, urgency_level, detection_date, photo_evidence, resolved) 
+            const query = `
+                INSERT INTO reports (report_name, email, location_description, gps_location, issue_type, issue_description, urgency_level, detection_date, photo_evidence, resolved) 
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                ON CONFLICT (id) DO NOTHING`, // Si tienes una clave única en `id`, evita duplicados
-                [
-                    report.reporter_name || "Sin nombre",
-                    report.email || "Sin correo",
-                    report.location_description || "Sin descripción",
-                    report.gps_location || "Sin coordenadas",
-                    report.issue_type || "Otro",
-                    report.issue_description || "Sin descripción",
-                    report.urgency_level || "Baja",
-                    report.detection_date || new Date().toISOString().split('T')[0],
-                    report.photo_evidence || null,
-                    false, // Los datos sincronizados inicialmente no estarán resueltos
-                ]
-            );
+                ON CONFLICT DO NOTHING
+            `;
+
+            const values = [
+                report.reporter_name || "Sin nombre",
+                report.email || "Sin correo",
+                report.location_description || "Sin descripción",
+                report.gps_location || "Sin coordenadas",
+                report.issue_type || "Otro",
+                report.issue_description || "Sin descripción",
+                report.urgency_level || "Baja",
+                report.detection_date || new Date().toISOString().split('T')[0],
+                report.photo_evidence || null,
+                false,
+            ];
+
+            try {
+                await pool.query(query, values);
+            } catch (err) {
+                console.error('Error al insertar reporte:', err);
+            }
         }
 
         res.status(200).send("Datos sincronizados correctamente.");
@@ -92,8 +99,6 @@ app.get('/api/sync', async (req, res) => {
         res.status(500).send("Error al sincronizar datos.");
     }
 });
-
-
 
 // Ruta para insertar un reporte en la base de datos
 app.post('/api/reports', async (req, res) => {
