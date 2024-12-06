@@ -326,5 +326,12 @@ button.delete-btn:hover {
     line-height: 1.5;
     color: #333;
 }
+.custom-marker div {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
 
 
