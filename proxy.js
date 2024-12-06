@@ -67,26 +67,32 @@ app.get('/api', async (req, res) => {
         const reports = response.data.results;
 
         for (const report of reports) {
+            console.log('Procesando reporte:', report); // Imprime cada reporte
+
             const query = `
                 INSERT INTO reports (reporter_name, email, location_description, gps_location, issue_type, issue_description, urgency_level, detection_date, photo_evidence, additional_notes, resolved)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 ON CONFLICT (id) DO NOTHING;
             `;
             const values = [
-                report.reporter_name,
-                report.email,
-                report.location_description,
-                report.gps_location,
-                report.issue_type,
-                report.issue_description,
-                report.urgency_level,
-                report.detection_date,
-                report.photo_evidence,
-                report.additional_notes,
+                report.reporter_name || 'No especificado',
+                report.email || 'No especificado',
+                report.location_description || 'Sin descripción',
+                report.gps_location || 'Sin coordenadas',
+                report.issue_type || 'Otro',
+                report.issue_description || 'Sin descripción',
+                report.urgency_level || 'No especificado',
+                report.detection_date || new Date().toISOString().split('T')[0],
+                report.photo_evidence || null,
+                report.additional_notes || null,
                 false, // Siempre inicia como no resuelto
             ];
 
-            await pool.query(query, values);
+            try {
+                await pool.query(query, values);
+            } catch (dbError) {
+                console.error('Error al insertar en la base de datos:', dbError);
+            }
         }
 
         res.status(200).json({ message: 'Datos sincronizados con la base de datos.' });
@@ -95,6 +101,7 @@ app.get('/api', async (req, res) => {
         res.status(500).send('Error al procesar los datos de KoboToolbox.');
     }
 });
+
 
 
 // Ruta para insertar un reporte en la base de datos
